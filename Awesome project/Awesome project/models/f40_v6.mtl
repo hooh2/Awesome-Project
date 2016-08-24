@@ -1,0 +1,100 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 09.08.2016 15:14:33
+
+newmtl 03___Default
+	Ns 10.0000
+	Ni 1.5000
+	d 0.1000
+	Tr 0.9000
+	Tf 0.1000 0.1000 0.1000 
+	illum 2
+	Ka 0.5882 0.5882 0.5882
+	Kd 0.5882 0.5882 0.5882
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka glass.png
+	map_Kd glass.png
+
+newmtl 02___Default
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5882 0.5882 0.5882
+	Kd 0.5882 0.5882 0.5882
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka black.png
+	map_Kd black.png
+
+newmtl 04___Default
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5882 0.5882 0.5882
+	Kd 0.5882 0.5882 0.5882
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka d_gray.png
+	map_Kd d_gray.png
+
+newmtl 05___Default
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5882 0.5882 0.5882
+	Kd 0.5882 0.5882 0.5882
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka yellow.png
+	map_Kd yellow.png
+
+newmtl 01___Default
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5882 0.5882 0.5882
+	Kd 0.5882 0.5882 0.5882
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka red.png
+	map_Kd red.png
+
+newmtl F40shieS
+	Ns 30.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0039 0.0039 0.0039
+	Kd 0.4549 0.4549 0.4549
+	Ks 0.7922 0.7922 0.7922
+	Ke 0.0000 0.0000 0.0000
+	map_Ka SIDEHORS.JPG
+	map_Kd SIDEHORS.JPG
+
+newmtl F40shieF
+	Ns 100.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0275 0.0980 0.0980
+	Kd 0.1333 0.4549 0.4549
+	Ks 0.7922 0.7922 0.7922
+	Ke 0.0000 0.0000 0.0000
+	map_Ka FRNTHORS.JPG
+	map_Kd FRNTHORS.JPG

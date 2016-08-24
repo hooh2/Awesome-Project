@@ -7,7 +7,7 @@ RoadComponent2::~RoadComponent2() {}
 
 void RoadComponent2::init()
 {
-	auto scene = aiImportFile("models/OBJ/RDp_2_FV.OBJ", aiProcessPreset_TargetRealtime_MaxQuality);
+	auto scene = aiImportFile("models/RDp_2_FV.OBJ", aiProcessPreset_TargetRealtime_MaxQuality);
 
 	if (scene && scene->mNumMeshes != 0)
 	{

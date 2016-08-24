@@ -7,7 +7,7 @@ BuildingComponent::~BuildingComponent() {}
 
 void BuildingComponent::init()
 {
-	auto scene = aiImportFile("models/OBJ/grass_v21.OBJ", aiProcessPreset_TargetRealtime_MaxQuality);
+	auto scene = aiImportFile("models/grass_v21.OBJ", aiProcessPreset_TargetRealtime_MaxQuality);
 
 	if (scene && scene->mNumMeshes != 0)
 	{

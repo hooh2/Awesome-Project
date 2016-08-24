@@ -7,7 +7,7 @@ CarTireFrontLeft::~CarTireFrontLeft() {}
 
 void CarTireFrontLeft::init()
 {
-	auto scene = aiImportFile("models/OBJ/F40tire_front_left.obj", aiProcessPreset_TargetRealtime_MaxQuality);
+	auto scene = aiImportFile("models/F40tire_front_left.obj", aiProcessPreset_TargetRealtime_MaxQuality);
 
 	if (scene && scene->mNumMeshes != 0)
 	{
