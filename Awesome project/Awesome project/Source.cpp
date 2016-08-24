@@ -1,8 +1,3 @@
-/*
-* Copyright 2011-2016 Branimir Karadzic. All rights reserved.
-* License: https://github.com/bkaradzic/bgfx#license-bsd-2-clause
-*/
-
 #include <common\common.h>
 #include <common\entry\input.h>
 #include <common\bgfx_utils.h>
@@ -21,12 +16,14 @@
 #include "CarTireFrontLeft.h"
 #include "CarTireFrontRight.h"
 #include "BuildingComponent.h"
+#include "RoadAndGroundComponent.h"
 #include "PosColorVertex.h"
 #include <memory>
 
 glm::mat4 mtx;
 
 CarComponent car;
+//bgfx::ProgramHandle program;
 
 std::vector<EntityPtr> entities;
 std::vector<bgfx::TextureHandle> textures;
@@ -44,7 +41,8 @@ class MyGame : public entry::AppI
 		m_debug = BGFX_DEBUG_TEXT;
 		m_reset = BGFX_RESET_VSYNC;
 
-		bgfx::init();
+		bgfx::init(bgfx::RendererType::Enum::OpenGL);
+		//bgfx::init(bgfx::RendererType::Enum::Direct3D11);
 		bgfx::reset(m_width, m_height, m_reset);
 
 		// Enable debug text.
@@ -60,6 +58,8 @@ class MyGame : public entry::AppI
 
 		// Create vertex stream declaration.
 		PosColorVertex::init();
+
+		//program = loadProgram("vs_tree", "fs_tree");
 
 		car.init();
 
@@ -79,13 +79,13 @@ class MyGame : public entry::AppI
 		entities.push_back(carTireFrontRight);
 		carTireFrontRight->addComponent(std::make_shared<CarTireFrontRight>());
 
-		auto building = std::make_shared<Entity>();
-		entities.push_back(building);
-		building->addComponent(std::make_shared<BuildingComponent>());
+		auto buildings = std::make_shared<Entity>();
+		entities.push_back(buildings);
+		buildings->addComponent(std::make_shared<BuildingComponent>());
 
-		//auto RD2 = std::make_shared<Entity>();
-		//entities.push_back(RD2);
-		//RD1->addComponent(std::make_shared<RoadComponent2>());
+		auto roadAndGround = std::make_shared<Entity>();
+		entities.push_back(roadAndGround);
+		roadAndGround->addComponent(std::make_shared<RoadAndGroundComponent>());
 
 		m_timeOffset = bx::getHPCounter();
 
@@ -138,8 +138,9 @@ class MyGame : public entry::AppI
 			glm::vec3 ViewTarget;
 			car.getCarPos(ViewTarget);
 			static glm::vec4 View1OFFe;
-			//View1OFFe = playerRotationMat * glm::vec4(0, 15.0f, -25.0f, 1);
-			View1OFFe = glm::vec4(0, 10.0f, -10.0f, 1);
+			View1OFFe = playerRotationMat * glm::vec4(0, 15.0f, -25.0f, 1);
+			//View1OFFe = playerRotationMat * glm::vec4(0, 300.0f, -300.0f, 1); //testing set
+			//View1OFFe = glm::vec4(0, 100.0f, -100.0f, 1); //testing set
 			glm::vec3 View1eye = glm::vec3(ViewTarget.x + View1OFFe.x, ViewTarget.y + View1OFFe.y, ViewTarget.z + View1OFFe.z);
 
 			float at[3] = { ViewTarget.x, ViewTarget.y,  ViewTarget.z };

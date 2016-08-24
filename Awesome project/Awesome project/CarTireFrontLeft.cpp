@@ -43,8 +43,6 @@ void CarTireFrontLeft::init()
 			model->m_tex = textures[texOffset + model->mMesh->mMaterialIndex];
 
 			this->entity->addComponent(model);
-
-			model->init();
 		}
 	}
 
@@ -67,7 +65,7 @@ void CarTireFrontLeft::update()
 	car.getCarPos(car_pos);
 	car.getTireFrontRot(turnRot);
 
-	mtx = glm::rotate(mtx, turnRot, glm::vec3(0.f, 1.f, 0.f));
+	//mtx = glm::rotate(mtx, turnRot, glm::vec3(0.f, 1.f, 0.f));
 
 	this->entity->updateMTX(mtx);
 	this->entity->updatePosition(car_pos);

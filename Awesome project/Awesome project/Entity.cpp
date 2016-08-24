@@ -23,6 +23,7 @@ void Entity::addComponent(ComponentPtr component)
 
 void Entity::init()
 {
+	program = loadProgram("vs_tree", "fs_tree");
 
 	for (size_t i = 0; i < components.size(); i++)
 	{

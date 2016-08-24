@@ -43,8 +43,6 @@ void CarTireFrontRight::init()
 			model->m_tex = textures[texOffset + model->mMesh->mMaterialIndex];
 
 			this->entity->addComponent(model);
-
-			model->init();
 		}
 	}
 

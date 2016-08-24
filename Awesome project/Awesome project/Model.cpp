@@ -67,7 +67,7 @@ void Model::init()
 		bgfx::copy(indices.data(), indices.size() * sizeof(unsigned int)), BGFX_BUFFER_INDEX32);
 
 	// Create program from shaders.
-	m_program = loadProgram("vs_tree", "fs_tree");
+	this->entity->getModelProgram(m_program);
 
 }
 

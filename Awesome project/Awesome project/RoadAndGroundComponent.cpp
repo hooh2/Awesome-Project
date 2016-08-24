@@ -1,13 +1,13 @@
-#include "BuildingComponent.h"
+#include "RoadAndGroundComponent.h"
 
 extern std::vector<bgfx::TextureHandle> textures;
 
-BuildingComponent::BuildingComponent() {}
-BuildingComponent::~BuildingComponent() {}
+RoadAndGroundComponent::RoadAndGroundComponent() {}
+RoadAndGroundComponent::~RoadAndGroundComponent() {}
 
-void BuildingComponent::init()
+void RoadAndGroundComponent::init()
 {
-	auto scene = aiImportFile("models/Buildings_FV.OBJ", aiProcessPreset_TargetRealtime_MaxQuality);
+	auto scene = aiImportFile("models/Ground_FV.OBJ", aiProcessPreset_TargetRealtime_MaxQuality);
 
 	if (scene && scene->mNumMeshes != 0)
 	{
@@ -70,12 +70,7 @@ void BuildingComponent::init()
 	this->entity->updateMTX(mtx);
 }
 
-void BuildingComponent::update()
-{
-	
-}
-
-void BuildingComponent::faceComposer(std::vector<collisionStruct>& params)
+void RoadAndGroundComponent::update()
 {
 
 }

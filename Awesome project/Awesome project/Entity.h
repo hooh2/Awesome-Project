@@ -26,6 +26,9 @@ public:
 	void setCarObject(CarComponent& in_obj) { car = in_obj; };
 	void getCarObject(CarComponent& in_obj) { in_obj = car; };
 
+	void setModelProgram(bgfx::ProgramHandle& in_program) { program = in_program; };
+	void getModelProgram(bgfx::ProgramHandle& in_program) { in_program = program; };
+
 private:
 
 	std::vector<ComponentPtr> components;
@@ -33,6 +36,7 @@ private:
 	glm::mat4 mtx;
 	glm::vec3 pos;
 	CarComponent car;
+	bgfx::ProgramHandle program;
 };
 
 using EntityPtr = std::shared_ptr<Entity>;
