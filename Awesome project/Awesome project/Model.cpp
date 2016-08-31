@@ -118,15 +118,29 @@ void Model::getMeshVertexPos(std::vector<glm::vec3>& incPositions)
 
 void Model::getMeshVertexNor(std::vector<glm::vec3>& incNormals)
 {
-	std::vector<glm::vec3> nor(mMesh->mNumVertices);
+	std::vector<glm::vec3> norms;
 
-	for (size_t i = 0; i < mMesh->mNumVertices; i++)
+	for (size_t i = 0; i < mMesh->mNumFaces; i++)
 	{
-		auto norm = mMesh->mNormals[i];
-		nor[i] = glm::vec3(norm.x, norm.y, norm.z);
+		std::vector<glm::vec3> triangl;
+
+		for (size_t j = 0; j < mMesh->mFaces[i].mNumIndices; j++)
+		{
+			auto vert = mMesh->mVertices[mMesh->mFaces[i].mIndices[j]];
+			glm::vec3 pos = glm::vec3(vert.x, vert.y, vert.z);
+			triangl.push_back(pos);
+		}
+
+		glm::vec3 edge1_1 = triangl[1] - triangl[0];
+		glm::vec3 edge2_1 = triangl[2] - triangl[0];
+
+		glm::vec3 normal_local = glm::cross(edge1_1, edge2_1);
+
+		normal_local = glm::normalize(normal_local);
+		norms.push_back(normal_local);
 	}
 
-	incNormals = nor;
+	incNormals = norms;
 }
 
 void Model::getMeshIdices(std::vector<unsigned int>& incIndices)

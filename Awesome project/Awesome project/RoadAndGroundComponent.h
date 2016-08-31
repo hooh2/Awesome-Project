@@ -29,14 +29,12 @@ private:
 	glm::vec3 pos;
 	glm::mat4 mtx;
 
-	struct collisionStruct
-	{
-		std::vector<glm::vec3> positions;
-		std::vector<glm::vec3> normals;
-		std::vector<unsigned int> indices;
-		std::vector<std::vector<glm::vec3>> triangles;
-	};
+	std::vector<glm::vec3> normals;
+	std::vector<std::vector<glm::vec3>> triangles;
 
-	std::vector<collisionStruct> collisionParams;
+	void Y_cordinate();
+	bool BarycentricCalculation(glm::vec3 & point, float dist, int i);
+	void QuadSeparation(std::vector<std::vector<glm::vec3>> triangles);
+	void calcBoundingBox(std::vector<std::vector<glm::vec3>> triangles, std::vector<glm::vec3>& boundingBox);
+
 };
-

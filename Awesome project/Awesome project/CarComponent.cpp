@@ -1,9 +1,9 @@
 #include "CarComponent.h"
 
-glm::vec3 rightF = glm::vec3(12.f, 0.f, 36.5f);
-glm::vec3 leftF = glm::vec3(-12.f, 0.f, 36.5f);
-glm::vec3 rightB = glm::vec3(12.f, 0.f, 0.f);
-glm::vec3 leftB = glm::vec3(-12.f, 0.f, 0.f);
+glm::vec3 rightF = glm::vec3(2.1f, 0.f, 6.5f);
+glm::vec3 leftF = glm::vec3(-2.1f, 0.f, 6.5f);
+glm::vec3 rightB = glm::vec3(2.1f, 0.f, 0.f);
+glm::vec3 leftB = glm::vec3(-2.1f, 0.f, 0.f);
 
 CarComponent::CarComponent() {}
 CarComponent::~CarComponent() {}
@@ -50,12 +50,14 @@ void CarComponent::update()
 	updateTransform(0, rotY, 0);
 	car_pos += speedZ * glm::vec3(rotationMTX[2][0], rotationMTX[2][1], rotationMTX[2][2]);
 
-	bgfx::dbgTextPrintf(2, 2, 0x0f, "car_pos: %f, %f, %f", car_pos.x, car_pos.y, car_pos.z);
-
 	mtx = glm::translate(mtx, car_pos);
 	mtx = mtx * rotationMTX;
 	car_mtx = mtx;
 
+	glm::vec4 rightFT = glm::vec4(rightF, 1.f);
+	glm::vec4 worldRirhtFT = mtx * rightFT;
+
+	bgfx::dbgTextPrintf(2, 2, 0x0f, "worldRirhtFT: %f, %f, %f", worldRirhtFT.x, worldRirhtFT.y, worldRirhtFT.z);
 }
 
 void CarComponent::updateTransform(float xinc, float yinc, float zinc)
