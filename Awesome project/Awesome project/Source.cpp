@@ -146,8 +146,6 @@ class MyGame : public entry::AppI
 			float at[3] = { ViewTarget.x, ViewTarget.y,  ViewTarget.z };
 			float eye[3] = { View1eye.x, View1eye.y, View1eye.z };
 
-			bgfx::dbgTextPrintf(2, 3, 0x0f, "eye: %f, %f, %f", eye[0], eye[1], eye[2]);
-
 			float view[16];
 			bx::mtxLookAt(view, eye, at);
 

@@ -15,6 +15,10 @@
 #include "PosColorVertex.h"
 #include <memory>
 
+#include <fstream>
+#include <iostream>
+#include <filesystem> 
+
 class RoadAndGroundComponent :
 	public Component
 {
@@ -28,13 +32,17 @@ public:
 private:
 	glm::vec3 pos;
 	glm::mat4 mtx;
+	CarComponent car;
 
-	std::vector<glm::vec3> normals;
-	std::vector<std::vector<glm::vec3>> triangles;
+	std::vector<glm::vec3> model_normals;
+	std::vector<std::vector<glm::vec3>> model_triangles;
+	std::vector<std::vector<glm::vec3>> quadsMinAndMax;
+	std::vector<std::vector<unsigned int>> trianglesInQuads;
 
 	void Y_cordinate();
-	bool BarycentricCalculation(glm::vec3 & point, float dist, int i);
+	bool BarycentricCalculation2Dvec(glm::vec2 point, std::vector<glm::vec2> triangle);
 	void QuadSeparation(std::vector<std::vector<glm::vec3>> triangles);
+	bool do_line_intersects(std::vector<glm::vec2> line1, std::vector<glm::vec2> line2);
 	void calcBoundingBox(std::vector<std::vector<glm::vec3>> triangles, std::vector<glm::vec3>& boundingBox);
 
 };

@@ -36,8 +36,6 @@ void RoadAndGroundComponent::init()
 			}
 		}
 
-
-
 		for (size_t i = 0; i < scene->mNumMeshes; i++)
 		{
 			auto model = std::make_shared<Model>();
@@ -55,13 +53,23 @@ void RoadAndGroundComponent::init()
 
 			for (unsigned int n = 0; n < mesh_tris.size(); n++)
 			{
-				normals.push_back(mesh_normals[n]);
-				triangles.push_back(mesh_tris[n]);
+				model_normals.push_back(mesh_normals[n]);
+				model_triangles.push_back(mesh_tris[n]);
 			}
 		}
 	}
 
-	QuadSeparation(triangles);
+	if (std::experimental::filesystem::exists("helloworld.txt"))
+	{
+		std::cout << "File exists \n";
+	}
+	else
+	{
+		std::cout << "No file exists \n";
+	}
+
+	//QuadSeparation(model_triangles);
+	this->entity->getCarObject(car);
 
 	pos = glm::vec3(0.f, 0.f, 0.f);
 	mtx = glm::translate(mtx, pos);
@@ -71,42 +79,72 @@ void RoadAndGroundComponent::init()
 
 void RoadAndGroundComponent::update()
 {
+	this->entity->getCarObject(car);
 
+	glm::vec3 car_pos;
+	car.getCarPos(car_pos);
+
+	static unsigned int q;
+	q = 0;
+
+	for (unsigned int i = 0; i < quadsMinAndMax.size(); i++)
+	{
+		if (car_pos.x < quadsMinAndMax[i][1].x)
+		{
+			if (car_pos.x > quadsMinAndMax[i][0].x)
+			{
+				if (car_pos.z < quadsMinAndMax[i][1].z)
+				{
+					if (car_pos.z > quadsMinAndMax[i][0].z)
+					{
+						q = i;
+					}
+				}
+			}
+		}
+	}
+	
+	bgfx::dbgTextPrintf(2, 3, 0x0f, "Car is in %d quad", q);
 }
-
-
 
 void RoadAndGroundComponent::Y_cordinate()
 {
 
 }
 
-bool RoadAndGroundComponent::BarycentricCalculation(glm::vec3& point, float dist, int i)
+bool RoadAndGroundComponent::BarycentricCalculation2Dvec(glm::vec2 point, std::vector<glm::vec2> triangle)
 {
-	//glm::vec3 P = point - norms[i] * dist;
+	// Compute vectors        
+	glm::vec2 v0 = triangle[2] - triangle[0];
+	glm::vec2 v1 = triangle[1] - triangle[0];
+	glm::vec2 v2 = point - triangle[0];
 
-	//// Compute vectors        
-	//glm::vec3 v0 = verts[triangles[i].z] - verts[triangles[i].x];
-	//glm::vec3 v1 = verts[triangles[i].y] - verts[triangles[i].x];
-	//glm::vec3 v2 = P - verts[triangles[i].x];
+	// Compute dot products
+	float dot00 = glm::dot(v0, v0);
+	float dot01 = glm::dot(v0, v1);
+	float dot02 = glm::dot(v0, v2);
+	float dot11 = glm::dot(v1, v1);
+	float dot12 = glm::dot(v1, v2);
 
-	//// Compute dot products
-	//float dot00 = glm::dot(v0, v0);
-	//float dot01 = glm::dot(v0, v1);
-	//float dot02 = glm::dot(v0, v2);
-	//float dot11 = glm::dot(v1, v1);
-	//float dot12 = glm::dot(v1, v2);
+	// Compute barycentric coordinates
+	float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+	float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+	float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
-	//// Compute barycentric coordinates
-	//float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
-	//float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-	//float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+	// Check if point is in triangle
+	return (u >= 0) && (v >= 0) && (u + v < 1);
+}
 
-	//// Check if point is in triangle
-	//if ((u >= 0) && (v >= 0) && (u + v < 1))
-	//	return true;
-	//else
-		return false;
+bool RoadAndGroundComponent::do_line_intersects(std::vector<glm::vec2> line1, std::vector<glm::vec2> line2)
+{
+	glm::vec2 v1 = line1[1] - line1[0];
+	glm::vec2 v2 = line2[1] - line2[0];
+
+	float s, t;
+	s = (-v1.y * (line1[0].x - line2[0].x) + v1.x * (line1[0].y - line2[0].y)) / (-v2.x * v1.y + v1.x * v2.y);
+	t = (v2.x * (line1[0].y - line2[0].y) - v2.y * (line1[0].x - line2[0].x)) / (-v2.x * v1.y + v1.x * v2.y);
+
+	return s >= 0 && s <= 1 && t >= 0 && t <= 1; // Check if lines intersects
 }
 
 void RoadAndGroundComponent::QuadSeparation(std::vector<std::vector<glm::vec3>> triangles)
@@ -123,8 +161,6 @@ void RoadAndGroundComponent::QuadSeparation(std::vector<std::vector<glm::vec3>> 
 	float quadSeze_x = x_length / 8;
 	float quadSeze_z = z_length / 8;
 
-	std::vector<std::vector<glm::vec3>> quadsMinAndMax;
-
 	for (unsigned int w = 0; w < 8; w++)
 	{
 		for (unsigned int h = 0; h < 8; h++)
@@ -138,6 +174,116 @@ void RoadAndGroundComponent::QuadSeparation(std::vector<std::vector<glm::vec3>> 
 		}
 	}
 
+	for (unsigned int i = 0; i < quadsMinAndMax.size(); i++)
+	{
+		std::vector<unsigned int> trianglesInThisQuad;
+
+		for (unsigned int j = 0; j < triangles.size(); j++)
+		{
+			for (unsigned int c = 0; c < 3; c++)
+			{
+				if (triangles[j][c].x < quadsMinAndMax[i][1].x)
+				{
+					if (triangles[j][c].x > quadsMinAndMax[i][0].x)
+					{
+						if (triangles[j][c].z < quadsMinAndMax[i][1].z)
+						{
+							if (triangles[j][c].z > quadsMinAndMax[i][0].z)
+							{
+								trianglesInThisQuad.push_back(j);
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			if (trianglesInThisQuad.size() != 0 && j == trianglesInThisQuad.back())
+			{
+				continue;
+			}
+
+			glm::vec2 point_a = glm::vec2(quadsMinAndMax[i][0].x, quadsMinAndMax[i][1].z);
+			glm::vec2 point_b = glm::vec2(quadsMinAndMax[i][1].x, quadsMinAndMax[i][1].z);
+			glm::vec2 point_c = glm::vec2(quadsMinAndMax[i][0].x, quadsMinAndMax[i][0].z);
+			glm::vec2 point_d = glm::vec2(quadsMinAndMax[i][1].x, quadsMinAndMax[i][0].z);
+
+			std::vector<glm::vec2> edgeAB = { point_a, point_b };
+			std::vector<glm::vec2> edgeBC = { point_b, point_c };
+			std::vector<glm::vec2> edgeCD = { point_c, point_d };
+			std::vector<glm::vec2> edgeDA = { point_d, point_a };
+
+			glm::vec2 triangle_point_a = glm::vec2(triangles[j][0].x, triangles[j][0].z);
+			glm::vec2 triangle_point_b = glm::vec2(triangles[j][1].x, triangles[j][1].z);
+			glm::vec2 triangle_point_c = glm::vec2(triangles[j][2].x, triangles[j][2].z);
+
+			std::vector<glm::vec2> triangle_edgeAB = { triangle_point_a, triangle_point_b };
+			std::vector<glm::vec2> triangle_edgeBC = { triangle_point_b, triangle_point_c };
+			std::vector<glm::vec2> triangle_edgeCA = { triangle_point_c, triangle_point_a };
+
+			if (do_line_intersects(edgeAB, triangle_edgeAB))
+			{
+				trianglesInThisQuad.push_back(j);
+			}
+			else if (do_line_intersects(edgeAB, triangle_edgeBC))
+			{
+				trianglesInThisQuad.push_back(j);
+			}
+			else if (do_line_intersects(edgeAB, triangle_edgeCA))
+			{
+				trianglesInThisQuad.push_back(j);
+			}
+			else
+			{
+				if (do_line_intersects(edgeBC, triangle_edgeAB))
+				{
+					trianglesInThisQuad.push_back(j);
+				}
+				else if (do_line_intersects(edgeBC, triangle_edgeBC))
+				{
+					trianglesInThisQuad.push_back(j);
+				}
+				else if (do_line_intersects(edgeBC, triangle_edgeCA))
+				{
+					trianglesInThisQuad.push_back(j);
+				}
+				else
+				{
+					if (do_line_intersects(edgeCD, triangle_edgeAB))
+					{
+						trianglesInThisQuad.push_back(j);
+					}
+					else if (do_line_intersects(edgeCD, triangle_edgeBC))
+					{
+						trianglesInThisQuad.push_back(j);
+					}
+					else if (do_line_intersects(edgeCD, triangle_edgeCA))
+					{
+						trianglesInThisQuad.push_back(j);
+					}
+					else
+					{
+						if (do_line_intersects(edgeDA, triangle_edgeAB))
+						{
+							trianglesInThisQuad.push_back(j);
+						}
+						else if (do_line_intersects(edgeDA, triangle_edgeBC))
+						{
+							trianglesInThisQuad.push_back(j);
+						}
+						else if (do_line_intersects(edgeDA, triangle_edgeCA))
+						{
+							trianglesInThisQuad.push_back(j);
+						}
+					}
+				}
+			}
+		}
+
+		std::sort(trianglesInThisQuad.begin(), trianglesInThisQuad.end());
+
+		trianglesInQuads.push_back(trianglesInThisQuad);
+	}
 }
 
 void RoadAndGroundComponent::calcBoundingBox(std::vector<std::vector<glm::vec3>> triangles, std::vector<glm::vec3>& boundingBox)
