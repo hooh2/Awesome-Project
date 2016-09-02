@@ -295,7 +295,7 @@ void RoadAndGroundComponent::calcBoundingBox(std::vector<std::vector<glm::vec3>>
 	float maxY = triangles[0][0].y;
 	float maxZ = triangles[0][0].z;
 
-	for (int i = 1; i < triangles.size(); i++)
+	for (unsigned int i = 1; i < triangles.size(); i++)
 	{
 		float x_a, y_a, z_a, x_b, y_b, z_b, x_c, y_c, z_c;
 

@@ -277,6 +277,11 @@ void calcMinBoundingSphere(Sphere& _sphere, const void* _vertices, uint32_t _num
 	_sphere.m_radius = bx::fsqrt(maxDistSq);
 }
 
+void calcPlaneUv(const Plane& _plane, float* _udir, float* _vdir)
+{
+	bx::vec3TangentFrame(_plane.m_normal, _udir, _vdir);
+}
+
 void buildFrustumPlanes(Plane* _result, const float* _viewProj)
 {
 	const float xw = _viewProj[ 3];

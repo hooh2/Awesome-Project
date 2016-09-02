@@ -15,10 +15,10 @@
 
 #include <SDL2/SDL.h>
 
-BX_PRAGMA_DIAGNOSTIC_PUSH_CLANG()
+BX_PRAGMA_DIAGNOSTIC_PUSH()
 BX_PRAGMA_DIAGNOSTIC_IGNORED_CLANG("-Wextern-c-compat")
 #include <SDL2/SDL_syswm.h>
-BX_PRAGMA_DIAGNOSTIC_POP_CLANG()
+BX_PRAGMA_DIAGNOSTIC_POP()
 
 #include <bgfx/bgfxplatform.h>
 #if defined(None) // X11 defines this...
@@ -29,11 +29,43 @@ BX_PRAGMA_DIAGNOSTIC_POP_CLANG()
 #include <bx/thread.h>
 #include <bx/handlealloc.h>
 #include <bx/readerwriter.h>
+#include <bx/crtimpl.h>
 #include <tinystl/allocator.h>
 #include <tinystl/string.h>
 
 namespace entry
 {
+	inline bool sdlSetWindow(SDL_Window* _window)
+	{
+		SDL_SysWMinfo wmi;
+		SDL_VERSION(&wmi.version);
+		if (!SDL_GetWindowWMInfo(_window, &wmi) )
+		{
+			return false;
+		}
+
+		bgfx::PlatformData pd;
+#	if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
+		pd.ndt          = wmi.info.x11.display;
+		pd.nwh          = (void*)(uintptr_t)wmi.info.x11.window;
+#	elif BX_PLATFORM_OSX
+		pd.ndt          = NULL;
+		pd.nwh          = wmi.info.cocoa.window;
+#	elif BX_PLATFORM_WINDOWS
+		pd.ndt          = NULL;
+		pd.nwh          = wmi.info.win.window;
+#	elif BX_PLATFORM_STEAMLINK
+		pd.ndt          = wmi.info.vivante.display;
+		pd.nwh          = wmi.info.vivante.window;
+#	endif // BX_PLATFORM_
+		pd.context      = NULL;
+		pd.backBuffer   = NULL;
+		pd.backBufferDS = NULL;
+		bgfx::setPlatformData(pd);
+
+		return true;
+	}
+
 	static uint8_t translateKeyModifiers(uint16_t _sdl)
 	{
 		uint8_t modifiers = 0;
@@ -46,6 +78,25 @@ namespace entry
 		modifiers |= _sdl & KMOD_LGUI   ? Modifier::LeftMeta   : 0;
 		modifiers |= _sdl & KMOD_RGUI   ? Modifier::RightMeta  : 0;
 		return modifiers;
+	}
+
+	static uint8_t translateKeyModifierPress(uint16_t _key)
+	{
+		uint8_t modifier;
+		switch (_key)
+		{
+			case SDL_SCANCODE_LALT:   { modifier = Modifier::LeftAlt;    } break;
+			case SDL_SCANCODE_RALT:   { modifier = Modifier::RightAlt;   } break;
+			case SDL_SCANCODE_LCTRL:  { modifier = Modifier::LeftCtrl;   } break;
+			case SDL_SCANCODE_RCTRL:  { modifier = Modifier::RightCtrl;  } break;
+			case SDL_SCANCODE_LSHIFT: { modifier = Modifier::LeftShift;  } break;
+			case SDL_SCANCODE_RSHIFT: { modifier = Modifier::RightShift; } break;
+			case SDL_SCANCODE_LGUI:   { modifier = Modifier::LeftMeta;   } break;
+			case SDL_SCANCODE_RGUI:   { modifier = Modifier::RightMeta;  } break;
+			default:                  { modifier = 0;                    } break;
+		}
+
+		return modifier;
 	}
 
 	static uint8_t s_translateKey[256];
@@ -218,6 +269,8 @@ namespace entry
 		return wmi.info.cocoa.window;
 #	elif BX_PLATFORM_WINDOWS
 		return wmi.info.win.window;
+#	elif BX_PLATFORM_STEAMLINK
+		return wmi.info.vivante.window;
 #	endif // BX_PLATFORM_
 	}
 
@@ -304,7 +357,15 @@ namespace entry
 			initTranslateKey(SDL_SCANCODE_END,          Key::End);
 			initTranslateKey(SDL_SCANCODE_PRINTSCREEN,  Key::Print);
 			initTranslateKey(SDL_SCANCODE_KP_PLUS,      Key::Plus);
+			initTranslateKey(SDL_SCANCODE_EQUALS,       Key::Plus);
 			initTranslateKey(SDL_SCANCODE_KP_MINUS,     Key::Minus);
+			initTranslateKey(SDL_SCANCODE_MINUS,        Key::Minus);
+			initTranslateKey(SDL_SCANCODE_GRAVE,        Key::Tilde);
+			initTranslateKey(SDL_SCANCODE_KP_COMMA,     Key::Comma);
+			initTranslateKey(SDL_SCANCODE_COMMA,        Key::Comma);
+			initTranslateKey(SDL_SCANCODE_KP_PERIOD,    Key::Period);
+			initTranslateKey(SDL_SCANCODE_PERIOD,       Key::Period);
+			initTranslateKey(SDL_SCANCODE_SLASH,        Key::Slash);
 			initTranslateKey(SDL_SCANCODE_F1,           Key::F1);
 			initTranslateKey(SDL_SCANCODE_F2,           Key::F2);
 			initTranslateKey(SDL_SCANCODE_F3,           Key::F3);
@@ -416,7 +477,7 @@ namespace entry
 
 			s_userEventStart = SDL_RegisterEvents(7);
 
-			bgfx::sdlSetWindow(m_window[0]);
+			sdlSetWindow(m_window[0]);
 			bgfx::renderFrame();
 
 			m_thread.init(MainThreadEntry::threadFunc, &m_mte);
@@ -528,29 +589,43 @@ namespace entry
 								uint8_t modifiers = translateKeyModifiers(kev.keysym.mod);
 								Key::Enum key = translateKey(kev.keysym.scancode);
 
-								// TODO: These keys are not captured by SDL_TEXTINPUT. Should be probably handled by SDL_TEXTEDITING. This is a workaround for now.
-								if (key == 1) // Escape
+#if 0
+								DBG("SDL scancode %d, key %d, name %s, key name %s"
+									, kev.keysym.scancode
+									, key
+									, SDL_GetScancodeName(kev.keysym.scancode)
+									, SDL_GetKeyName(kev.keysym.scancode)
+									);
+#endif // 0
+
+								/// If you only press (e.g.) 'shift' and nothing else, then key == 'shift', modifier == 0.
+								/// Further along, pressing 'shift' + 'ctrl' would be: key == 'shift', modifier == 'ctrl.
+								if (0 == key && 0 == modifiers)
+								{
+									modifiers = translateKeyModifierPress(kev.keysym.scancode);
+								}
+
+								/// TODO: These keys are not captured by SDL_TEXTINPUT. Should be probably handled by SDL_TEXTEDITING. This is a workaround for now.
+								if (Key::Esc == key)
 								{
 									uint8_t pressedChar[4];
 									pressedChar[0] = 0x1b;
 									m_eventQueue.postCharEvent(handle, 1, pressedChar);
 								}
-								else if (key == 2) // Enter
+								else if (Key::Return == key)
 								{
 									uint8_t pressedChar[4];
 									pressedChar[0] = 0x0d;
 									m_eventQueue.postCharEvent(handle, 1, pressedChar);
 								}
-								else if (key == 5) // Backspace
+								else if (Key::Backspace == key)
 								{
 									uint8_t pressedChar[4];
 									pressedChar[0] = 0x08;
 									m_eventQueue.postCharEvent(handle, 1, pressedChar);
 								}
-								else
-								{
-								    m_eventQueue.postKeyEvent(handle, key, modifiers, kev.state == SDL_PRESSED);
-								}
+
+								m_eventQueue.postKeyEvent(handle, key, modifiers, kev.state == SDL_PRESSED);
 							}
 						}
 						break;
@@ -745,8 +820,8 @@ namespace entry
 									void* nwh = sdlNativeWindowHandle(m_window[handle.idx]);
 									if (NULL != nwh)
 									{
-										m_eventQueue.postWindowEvent(handle, nwh);
 										m_eventQueue.postSizeEvent(handle, msg->m_width, msg->m_height);
+										m_eventQueue.postWindowEvent(handle, nwh);
 									}
 
 									delete msg;

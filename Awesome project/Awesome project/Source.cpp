@@ -1,6 +1,7 @@
 #include <common\common.h>
 #include <common\entry\input.h>
 #include <common\bgfx_utils.h>
+#include <bx\uint32_t.h>
 
 //--- GLM Functions ---
 #include <glm\glm.hpp>
@@ -38,7 +39,7 @@ class MyGame : public entry::AppI
 
 		m_width = 1280;
 		m_height = 720;
-		m_debug = BGFX_DEBUG_TEXT;
+		m_debug = BGFX_DEBUG_TEXT | BGFX_DEBUG_WIREFRAME;
 		m_reset = BGFX_RESET_VSYNC;
 
 		bgfx::init(bgfx::RendererType::Enum::OpenGL);
