@@ -16,14 +16,13 @@ void RoadAndGroundComponent::init()
 
 		if (scene->HasMaterials())
 		{
+			printf("Loading GroundAndRoad Textures ... ");
 			for (size_t i = 0; i < scene->mNumMaterials; i++)
 			{
 				aiString path;
 				scene->mMaterials[i]->GetTexture(aiTextureType_DIFFUSE, 0, &path);
 				if (path.operator!=(aiString("")))
 				{
-					printf("Ground Matirial %d Texture Not NULL; \n", i);
-
 					auto filename = std::string("./textures/") + path.C_Str();
 					bgfx::TextureHandle tex = loadTexture(filename.c_str());
 
@@ -31,9 +30,10 @@ void RoadAndGroundComponent::init()
 				}
 				else
 				{
-					printf("Ground Matirial %d Texture NULL; \n", i);
+					printf("\nGroundAndRoad Texture %d not assigned; \n", i);
 				}
 			}
+			printf("Done! \n");
 		}
 
 		for (size_t i = 0; i < scene->mNumMeshes; i++)
@@ -59,16 +59,7 @@ void RoadAndGroundComponent::init()
 		}
 	}
 
-	if (std::experimental::filesystem::exists("helloworld.txt"))
-	{
-		std::cout << "File exists \n";
-	}
-	else
-	{
-		std::cout << "No file exists \n";
-	}
-
-	//QuadSeparation(model_triangles);
+	QuadSeparation();
 	this->entity->getCarObject(car);
 
 	pos = glm::vec3(0.f, 0.f, 0.f);
@@ -84,8 +75,8 @@ void RoadAndGroundComponent::update()
 	glm::vec3 car_pos;
 	car.getCarPos(car_pos);
 
-	static unsigned int q;
-	q = 0;
+	static unsigned short int quad;
+	quad = 0;
 
 	for (unsigned int i = 0; i < quadsMinAndMax.size(); i++)
 	{
@@ -97,14 +88,33 @@ void RoadAndGroundComponent::update()
 				{
 					if (car_pos.z > quadsMinAndMax[i][0].z)
 					{
-						q = i;
+						quad = i;
 					}
 				}
 			}
 		}
 	}
+
+	static unsigned short int on_triangle;
+	glm::vec2 car_point = glm::vec2(car_pos.x, car_pos.z);
+
+	for (unsigned int i = 0; i < trianglesInQuads[quad].size(); i++)
+	{
+		std::vector<glm::vec2> triangle2D;
+		for (unsigned int j = 0; j < 3; j++)
+		{
+			glm::vec2 triangle_point_2D = glm::vec2(model_triangles[trianglesInQuads[quad][i]][j].x, model_triangles[trianglesInQuads[quad][i]][j].z);
+			triangle2D.push_back(triangle_point_2D);
+		}
+
+		if (BarycentricCalculation2Dvec(car_point, triangle2D))
+		{
+			on_triangle = trianglesInQuads[quad][i];
+		}
+	}
 	
-	bgfx::dbgTextPrintf(2, 3, 0x0f, "Car is in %d quad", q);
+	bgfx::dbgTextPrintf(2, 3, 0x0f, "Car is in quad %d", quad);
+	bgfx::dbgTextPrintf(2, 4, 0x0f, "Car is on triangle %d", on_triangle);
 }
 
 void RoadAndGroundComponent::Y_cordinate()
@@ -147,10 +157,10 @@ bool RoadAndGroundComponent::do_line_intersects(std::vector<glm::vec2> line1, st
 	return s >= 0 && s <= 1 && t >= 0 && t <= 1; // Check if lines intersects
 }
 
-void RoadAndGroundComponent::QuadSeparation(std::vector<std::vector<glm::vec3>> triangles)
+void RoadAndGroundComponent::QuadSeparation()
 {
 	std::vector<glm::vec3> MinAndMax;
-	calcBoundingBox(triangles, MinAndMax);
+	calcBoundingBox(model_triangles, MinAndMax);
 
 	glm::vec3 minOfTris = MinAndMax[0];
 	glm::vec3 maxOfTris = MinAndMax[1];
@@ -174,21 +184,39 @@ void RoadAndGroundComponent::QuadSeparation(std::vector<std::vector<glm::vec3>> 
 		}
 	}
 
+	std::string path = "models/TrianglesOfRoadAndGroundInQuads.txt";
+
+	if (std::experimental::filesystem::exists(path))
+	{
+		std::cout << "File " << path << " exists \n";
+		readTrianglesInQuads(path);
+	}
+	else
+	{
+		std::cout << "File " << path << " does not exists \n";
+		trianglesInQuadsSeparation(path);
+	}
+}
+
+void RoadAndGroundComponent::trianglesInQuadsSeparation(std::string path)
+{
+	printf("Creating trianglesInQuads... ");
+
 	for (unsigned int i = 0; i < quadsMinAndMax.size(); i++)
 	{
 		std::vector<unsigned int> trianglesInThisQuad;
 
-		for (unsigned int j = 0; j < triangles.size(); j++)
+		for (unsigned int j = 0; j < model_triangles.size(); j++)
 		{
 			for (unsigned int c = 0; c < 3; c++)
 			{
-				if (triangles[j][c].x < quadsMinAndMax[i][1].x)
+				if (model_triangles[j][c].x < quadsMinAndMax[i][1].x)
 				{
-					if (triangles[j][c].x > quadsMinAndMax[i][0].x)
+					if (model_triangles[j][c].x > quadsMinAndMax[i][0].x)
 					{
-						if (triangles[j][c].z < quadsMinAndMax[i][1].z)
+						if (model_triangles[j][c].z < quadsMinAndMax[i][1].z)
 						{
-							if (triangles[j][c].z > quadsMinAndMax[i][0].z)
+							if (model_triangles[j][c].z > quadsMinAndMax[i][0].z)
 							{
 								trianglesInThisQuad.push_back(j);
 								break;
@@ -213,9 +241,9 @@ void RoadAndGroundComponent::QuadSeparation(std::vector<std::vector<glm::vec3>> 
 			std::vector<glm::vec2> edgeCD = { point_c, point_d };
 			std::vector<glm::vec2> edgeDA = { point_d, point_a };
 
-			glm::vec2 triangle_point_a = glm::vec2(triangles[j][0].x, triangles[j][0].z);
-			glm::vec2 triangle_point_b = glm::vec2(triangles[j][1].x, triangles[j][1].z);
-			glm::vec2 triangle_point_c = glm::vec2(triangles[j][2].x, triangles[j][2].z);
+			glm::vec2 triangle_point_a = glm::vec2(model_triangles[j][0].x, model_triangles[j][0].z);
+			glm::vec2 triangle_point_b = glm::vec2(model_triangles[j][1].x, model_triangles[j][1].z);
+			glm::vec2 triangle_point_c = glm::vec2(model_triangles[j][2].x, model_triangles[j][2].z);
 
 			std::vector<glm::vec2> triangle_edgeAB = { triangle_point_a, triangle_point_b };
 			std::vector<glm::vec2> triangle_edgeBC = { triangle_point_b, triangle_point_c };
@@ -284,6 +312,66 @@ void RoadAndGroundComponent::QuadSeparation(std::vector<std::vector<glm::vec3>> 
 
 		trianglesInQuads.push_back(trianglesInThisQuad);
 	}
+	printf("Done! \n");
+	wrightTrianglesInQuads(path);
+}
+
+void RoadAndGroundComponent::wrightTrianglesInQuads(std::string path)
+{
+	std::ofstream fout;
+	fout.open(path);
+	if (fout.is_open())
+	{
+		std::cout << "Writing trianglesInQuads in to the file:\n" << path << " ... ";
+		fout << trianglesInQuads.size() << std::endl;
+		for (unsigned int i = 0; i < trianglesInQuads.size(); i++)
+		{
+			fout << trianglesInQuads[i].size() << std::endl;
+			for (unsigned int j = 0; j < trianglesInQuads[i].size(); j++)
+			{
+				fout << trianglesInQuads[i][j] << " ";
+			}
+			fout << std::endl;
+		}
+		fout.close();
+		printf("Done! \n");
+	}
+	else
+		std::cout << "Unable to open file " << path << std::endl;
+}
+
+void RoadAndGroundComponent::readTrianglesInQuads(std::string path)
+{
+	std::ifstream fin;
+	fin.open(path);
+	if (fin.is_open())
+	{
+
+		std::cout << "Reading trianglesInQuads from the file:\n" << path << " ... ";
+		unsigned int numOfQuads;
+		fin >> numOfQuads;
+		while (!fin.eof())
+		{
+
+			for (unsigned int i = 0; i < numOfQuads; i++)
+			{
+				unsigned int numOfIndices;
+				fin >> numOfIndices >> std::ws;
+				std::vector<unsigned int> trianglesInThisQuad;
+				for (unsigned int j = 0; j < numOfIndices; j++)
+				{
+					unsigned int triIndex;
+					fin >> triIndex >> std::ws;
+					trianglesInThisQuad.push_back(triIndex);
+				}
+				trianglesInQuads.push_back(trianglesInThisQuad);
+			}
+		}
+		fin.close();
+		printf("Done! \n");
+	}
+	else
+		std::cout << "Unable to open file " << path << std::endl;
 }
 
 void RoadAndGroundComponent::calcBoundingBox(std::vector<std::vector<glm::vec3>> triangles, std::vector<glm::vec3>& boundingBox)

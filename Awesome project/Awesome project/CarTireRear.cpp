@@ -16,23 +16,24 @@ void CarTireRear::init()
 
 		if (scene->HasMaterials())
 		{
+			printf("Loading Car rear tires Textures ... ");
 			for (size_t i = 0; i < scene->mNumMaterials; i++)
 			{
 				aiString path;
 				scene->mMaterials[i]->GetTexture(aiTextureType_DIFFUSE, 0, &path);
 				if (path.operator!=(aiString("")))
 				{
-					printf("Car Matirial %d Texture Not NULL; \n", i);
+					auto filename = std::string("./textures/") + path.C_Str();
+					bgfx::TextureHandle tex = loadTexture(filename.c_str());
+
+					textures[texOffset + i] = tex;
 				}
 				else
 				{
-					printf("Car Matirial %d Texture NULL; \n", i);
+					printf("\nCar rear tires Texture %d not assigned; \n", i);
 				}
-				auto filename = std::string("./textures/") + path.C_Str();
-				bgfx::TextureHandle tex = loadTexture(filename.c_str());
-
-				textures[texOffset + i] = tex;
 			}
+			printf("Done! \n");
 		}
 
 		for (size_t i = 0; i < scene->mNumMeshes; i++)

@@ -16,14 +16,13 @@ void BuildingComponent::init()
 
 		if (scene->HasMaterials())
 		{
+			printf("Loading Buildings Textures ... ");
 			for (size_t i = 0; i < scene->mNumMaterials; i++)
 			{
 				aiString path;
 				scene->mMaterials[i]->GetTexture(aiTextureType_DIFFUSE, 0, &path);
 				if (path.operator!=(aiString("")))
 				{
-					printf("Building Matirial %d Texture Not NULL; \n", i);
-
 					auto filename = std::string("./textures/") + path.C_Str();
 					bgfx::TextureHandle tex = loadTexture(filename.c_str());
 
@@ -31,9 +30,10 @@ void BuildingComponent::init()
 				}
 				else
 				{
-					printf("Building Matirial %d Texture NULL; \n", i);
+					printf("\nBuildings Texture %d not found; \n", i);
 				}
 			}
+			printf("Done! \n");
 		}
 
 		collisionParams.resize(scene->mNumMeshes);

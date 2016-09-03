@@ -17,6 +17,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <filesystem> 
 
 class RoadAndGroundComponent :
@@ -41,7 +42,10 @@ private:
 
 	void Y_cordinate();
 	bool BarycentricCalculation2Dvec(glm::vec2 point, std::vector<glm::vec2> triangle);
-	void QuadSeparation(std::vector<std::vector<glm::vec3>> triangles);
+	void QuadSeparation();
+	void trianglesInQuadsSeparation(std::string path);
+	void wrightTrianglesInQuads(std::string path);
+	void readTrianglesInQuads(std::string path);
 	bool do_line_intersects(std::vector<glm::vec2> line1, std::vector<glm::vec2> line2);
 	void calcBoundingBox(std::vector<std::vector<glm::vec3>> triangles, std::vector<glm::vec3>& boundingBox);
 

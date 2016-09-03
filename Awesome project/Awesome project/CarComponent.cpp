@@ -10,8 +10,12 @@ CarComponent::~CarComponent() {}
 
 void CarComponent::init()
 {
-
-
+	glm::mat4 mtx;
+	updateTransform(0, 0, 0);
+	car_pos += speedZ * glm::vec3(rotationMTX[2][0], rotationMTX[2][1], rotationMTX[2][2]);
+	mtx = glm::translate(mtx, car_pos);
+	mtx = mtx * rotationMTX;
+	car_mtx = mtx;
 }
 
 void CarComponent::update()
