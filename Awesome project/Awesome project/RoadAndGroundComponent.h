@@ -40,7 +40,7 @@ private:
 	std::vector<std::vector<glm::vec3>> quadsMinAndMax;
 	std::vector<std::vector<unsigned int>> trianglesInQuads;
 
-	void Y_cordinate();
+	void Y_cordinate(glm::vec3 pos_coord, float& point_y);
 	bool BarycentricCalculation2Dvec(glm::vec2 point, std::vector<glm::vec2> triangle);
 	void QuadSeparation();
 	void trianglesInQuadsSeparation(std::string path);

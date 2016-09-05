@@ -72,21 +72,38 @@ void RoadAndGroundComponent::update()
 {
 	this->entity->getCarObject(car);
 
-	glm::vec3 car_pos;
-	car.getCarPos(car_pos);
+	glm::vec3 car_front_right_tier; float CFRT_y;
+	glm::vec3 car_front_left_tier;  float CFLT_y;
+	glm::vec3 car_rear_right_tier;  float CRRT_y;
+	glm::vec3 car_rear_left_tier;   float CRLT_y;
+	
+	car.getFRTcoords(car_front_right_tier);
+	car.getFLTcoords(car_front_left_tier);
+	car.getRRTcoords(car_rear_right_tier);
+	car.getRLTcoords(car_rear_left_tier);
 
-	static unsigned short int quad;
-	quad = 0;
+	Y_cordinate(car_front_right_tier, CFRT_y);
+	Y_cordinate(car_front_left_tier, CFLT_y);
+	Y_cordinate(car_rear_right_tier, CRRT_y);
+	Y_cordinate(car_rear_left_tier, CRLT_y);
 
+	car.setTiersYcoords(CFRT_y, CFLT_y, CRRT_y, CRLT_y);
+
+	this->entity->setCarObject(car);
+}
+
+void RoadAndGroundComponent::Y_cordinate(glm::vec3 pos_coord, float& point_y)
+{
+	unsigned short int quad = 0;
 	for (unsigned int i = 0; i < quadsMinAndMax.size(); i++)
 	{
-		if (car_pos.x < quadsMinAndMax[i][1].x)
+		if (pos_coord.x < quadsMinAndMax[i][1].x)
 		{
-			if (car_pos.x > quadsMinAndMax[i][0].x)
+			if (pos_coord.x > quadsMinAndMax[i][0].x)
 			{
-				if (car_pos.z < quadsMinAndMax[i][1].z)
+				if (pos_coord.z < quadsMinAndMax[i][1].z)
 				{
-					if (car_pos.z > quadsMinAndMax[i][0].z)
+					if (pos_coord.z > quadsMinAndMax[i][0].z)
 					{
 						quad = i;
 					}
@@ -95,8 +112,8 @@ void RoadAndGroundComponent::update()
 		}
 	}
 
-	static unsigned short int on_triangle;
-	glm::vec2 car_point = glm::vec2(car_pos.x, car_pos.z);
+	unsigned short int on_triangle = 0;
+	glm::vec2 pos_point = glm::vec2(pos_coord.x, pos_coord.z);
 
 	for (unsigned int i = 0; i < trianglesInQuads[quad].size(); i++)
 	{
@@ -107,19 +124,16 @@ void RoadAndGroundComponent::update()
 			triangle2D.push_back(triangle_point_2D);
 		}
 
-		if (BarycentricCalculation2Dvec(car_point, triangle2D))
+		if (BarycentricCalculation2Dvec(pos_point, triangle2D))
 		{
 			on_triangle = trianglesInQuads[quad][i];
 		}
 	}
-	
-	bgfx::dbgTextPrintf(2, 3, 0x0f, "Car is in quad %d", quad);
-	bgfx::dbgTextPrintf(2, 4, 0x0f, "Car is on triangle %d", on_triangle);
-}
 
-void RoadAndGroundComponent::Y_cordinate()
-{
+	glm::vec3 norm = model_normals[on_triangle];
+	glm::vec3 point_x = model_triangles[on_triangle][0];
 
+	point_y = (norm.x * (point_x.x - pos_coord.x) + norm.y * point_x.y + norm.z *(point_x.z - pos_coord.z)) / norm.y;
 }
 
 bool RoadAndGroundComponent::BarycentricCalculation2Dvec(glm::vec2 point, std::vector<glm::vec2> triangle)

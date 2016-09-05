@@ -59,9 +59,15 @@ void CarComponent::update()
 	car_mtx = mtx;
 
 	glm::vec4 rightFT = glm::vec4(rightF, 1.f);
-	glm::vec4 worldRirhtFT = mtx * rightFT;
+	worldRirhtFT = mtx * rightFT;
+	glm::vec4 leftFT = glm::vec4(leftF, 1.f);
+	worldLeftFT = mtx * leftFT;
+	glm::vec4 rightBT = glm::vec4(rightB, 1.f);
+	worldRightBT = mtx * rightBT;
+	glm::vec4 leftBT = glm::vec4(leftB, 1.f);
+	worldLeftBT = mtx * leftBT;
 
-	bgfx::dbgTextPrintf(2, 2, 0x0f, "worldRirhtFT: %f, %f, %f", worldRirhtFT.x, worldRirhtFT.y, worldRirhtFT.z);
+	bgfx::dbgTextPrintf(2, 2, 0x0f, "worldRirhtFT: %f, %f, %f", worldRirhtFT.x, wRFT_y, worldRirhtFT.z);
 }
 
 void CarComponent::updateTransform(float xinc, float yinc, float zinc)

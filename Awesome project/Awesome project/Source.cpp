@@ -39,7 +39,7 @@ class MyGame : public entry::AppI
 
 		m_width = 1280;
 		m_height = 720;
-		m_debug = BGFX_DEBUG_TEXT | BGFX_DEBUG_WIREFRAME;
+		m_debug = BGFX_DEBUG_TEXT;// | BGFX_DEBUG_WIREFRAME;
 		m_reset = BGFX_RESET_VSYNC;
 
 		bgfx::init(bgfx::RendererType::Enum::OpenGL);
@@ -93,8 +93,9 @@ class MyGame : public entry::AppI
 		// Update all entities
 		for (auto& entity : entities)
 		{
-			entity->init();
 			entity->setCarObject(car);
+			entity->init();
+			entity->getCarObject(car);
 		}
 	}
 
@@ -159,8 +160,9 @@ class MyGame : public entry::AppI
 			// Update all entities
 			for (auto& entity : entities)
 			{
-				entity->update();
 				entity->setCarObject(car);
+				entity->update();
+				entity->getCarObject(car);
 			}
 
 			// Advance to next frame. Rendering thread will be kicked to
