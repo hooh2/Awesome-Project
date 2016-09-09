@@ -132,10 +132,16 @@
     <ClCompile Include="CarTireRear.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="EnvironmentBenches.cpp" />
+    <ClCompile Include="EnvironmentBusStops.cpp" />
+    <ClCompile Include="EnvironmentLightPoles.cpp" />
+    <ClCompile Include="EnvironmentMisc.cpp" />
+    <ClCompile Include="EnvironmentStreetLights.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ParticleComponent.cpp" />
     <ClCompile Include="RoadAndGroundComponent.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="TestTrack.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BuildingComponent.h" />
@@ -146,10 +152,16 @@
     <ClInclude Include="CarTireRear.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Entity.h" />
+    <ClInclude Include="EnvironmentBenches.h" />
+    <ClInclude Include="EnvironmentBusStops.h" />
+    <ClInclude Include="EnvironmentLightPoles.h" />
+    <ClInclude Include="EnvironmentMisc.h" />
+    <ClInclude Include="EnvironmentStreetLights.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ParticleComponent.h" />
     <ClInclude Include="PosColorVertex.h" />
     <ClInclude Include="RoadAndGroundComponent.h" />
+    <ClInclude Include="TestTrack.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -83,7 +83,7 @@ void CarComponent::update()
 	
 	car_pos = middleBetwinRearWeels;
 
-	bgfx::dbgTextPrintf(2, 2, 0x0f, "car_rot_2: %f", car_rot);
+	//bgfx::dbgTextPrintf(2, 2, 0x0f, "car_rot_2: %f", car_rot);
 
 }
 

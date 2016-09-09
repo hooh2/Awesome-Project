@@ -18,6 +18,12 @@
 #include "CarTireFrontRight.h"
 #include "BuildingComponent.h"
 #include "RoadAndGroundComponent.h"
+#include "TestTrack.h"
+#include "EnvironmentBenches.h"
+#include "EnvironmentBusStops.h"
+#include "EnvironmentLightPoles.h"
+#include "EnvironmentMisc.h"
+#include "EnvironmentStreetLights.h"
 #include "PosColorVertex.h"
 #include <memory>
 
@@ -88,6 +94,30 @@ class MyGame : public entry::AppI
 		entities.push_back(roadAndGround);
 		roadAndGround->addComponent(std::make_shared<RoadAndGroundComponent>());
 
+		auto test_track = std::make_shared<Entity>();
+		entities.push_back(test_track);
+		test_track->addComponent(std::make_shared<TestTrack>());
+
+		auto environment_benches = std::make_shared<Entity>();
+		entities.push_back(environment_benches);
+		environment_benches->addComponent(std::make_shared<EnvironmentBenches>());
+
+		auto environment_bus_stops = std::make_shared<Entity>();
+		entities.push_back(environment_bus_stops);
+		environment_bus_stops->addComponent(std::make_shared<EnvironmentBusStops>());
+
+		auto environment_light_poles = std::make_shared<Entity>();
+		entities.push_back(environment_light_poles);
+		environment_light_poles->addComponent(std::make_shared<EnvironmentLightPoles>());
+
+		auto environment_misc = std::make_shared<Entity>();
+		entities.push_back(environment_misc);
+		environment_misc->addComponent(std::make_shared<EnvironmentMisc>());
+
+		auto environment_street_lights = std::make_shared<Entity>();
+		entities.push_back(environment_street_lights);
+		environment_street_lights->addComponent(std::make_shared<EnvironmentStreetLights>());
+
 		m_timeOffset = bx::getHPCounter();
 
 		// Update all entities
@@ -141,9 +171,9 @@ class MyGame : public entry::AppI
 			glm::vec3 ViewTarget;
 			car.getCarPos(ViewTarget);
 			static glm::vec4 View1OFFe;
-			//View1OFFe = playerRotationMat * glm::vec4(0, 15.0f, -25.0f, 1);
+			View1OFFe = playerRotationMat * glm::vec4(0, 15.0f, -25.0f, 1);
 			//View1OFFe = playerRotationMat * glm::vec4(0, 300.0f, -300.0f, 1); //testing set
-			View1OFFe = glm::vec4(0, 15.0f, -15.0f, 1); //testing set
+			//View1OFFe = glm::vec4(0, 15.0f, -15.0f, 1); //testing set
 			glm::vec3 View1eye = glm::vec3(ViewTarget.x + View1OFFe.x, ViewTarget.y + View1OFFe.y, ViewTarget.z + View1OFFe.z);
 
 			float at[3] = { ViewTarget.x, ViewTarget.y,  ViewTarget.z };
