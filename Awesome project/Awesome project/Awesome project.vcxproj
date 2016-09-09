@@ -124,7 +124,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BuildingComponent.cpp" />
+    <ClCompile Include="BuildingBottoms.cpp" />
+    <ClCompile Include="BuildingTopping.cpp" />
     <ClCompile Include="CarBody.cpp" />
     <ClCompile Include="CarComponent.cpp" />
     <ClCompile Include="CarTireFrontLeft.cpp" />
@@ -144,7 +145,8 @@
     <ClCompile Include="TestTrack.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BuildingComponent.h" />
+    <ClInclude Include="BuildingBottoms.h" />
+    <ClInclude Include="BuildingTopping.h" />
     <ClInclude Include="CarBody.h" />
     <ClInclude Include="CarComponent.h" />
     <ClInclude Include="CarTireFrontLeft.h" />

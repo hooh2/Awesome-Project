@@ -15,12 +15,12 @@
 #include "PosColorVertex.h"
 #include <memory>
 
-class TestTrack :
+class BuildingBottoms :
 	public Component
 {
 public:
-	TestTrack();
-	~TestTrack();
+	BuildingBottoms();
+	~BuildingBottoms();
 
 	void init() override;
 	void update();
@@ -28,12 +28,16 @@ public:
 private:
 	glm::vec3 pos;
 	glm::mat4 mtx;
-	CarComponent car;
 
-	std::vector<glm::vec3> model_normals;
-	std::vector<std::vector<glm::vec3>> model_triangles;
-	std::vector<glm::vec3> modelBB;
+	struct collisionStruct
+	{
+		std::vector<glm::vec3> positions;
+		std::vector<glm::vec3> normals;
+		std::vector<unsigned int> indices;
+		std::vector<std::vector<glm::vec3>> triangles;
+	};
 
-	void calcBoundingBox(std::vector<std::vector<glm::vec3>> triangles, std::vector<glm::vec3>& boundingBox);
+	std::vector<collisionStruct> collisionParams;
+
+	void faceComposer(std::vector<collisionStruct>& params);
 };
-

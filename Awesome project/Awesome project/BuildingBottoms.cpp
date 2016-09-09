@@ -1,13 +1,13 @@
-#include "BuildingComponent.h"
+#include "BuildingBottoms.h"
 
 extern std::vector<bgfx::TextureHandle> textures;
 
-BuildingComponent::BuildingComponent() {}
-BuildingComponent::~BuildingComponent() {}
+BuildingBottoms::BuildingBottoms() {}
+BuildingBottoms::~BuildingBottoms() {}
 
-void BuildingComponent::init()
+void BuildingBottoms::init()
 {
-	auto scene = aiImportFile("models/Buildings_FV.OBJ", aiProcessPreset_TargetRealtime_MaxQuality);
+	auto scene = aiImportFile("models/Buildings_bottoms.OBJ", aiProcessPreset_TargetRealtime_MaxQuality);
 
 	if (scene && scene->mNumMeshes != 0)
 	{
@@ -16,7 +16,7 @@ void BuildingComponent::init()
 
 		if (scene->HasMaterials())
 		{
-			printf("Loading Buildings Textures ... ");
+			printf("Loading Buildings Bottom Parts Textures ... ");
 			for (size_t i = 0; i < scene->mNumMaterials; i++)
 			{
 				aiString path;
@@ -30,7 +30,7 @@ void BuildingComponent::init()
 				}
 				else
 				{
-					printf("\nBuildings Texture %d not found; \n", i);
+					printf("\nBuildings Bottom Parts Texture %d not found; \n", i);
 				}
 			}
 			printf("Done! \n");
@@ -70,12 +70,12 @@ void BuildingComponent::init()
 	this->entity->updateMTX(mtx);
 }
 
-void BuildingComponent::update()
+void BuildingBottoms::update()
 {
 	
 }
 
-void BuildingComponent::faceComposer(std::vector<collisionStruct>& params)
+void BuildingBottoms::faceComposer(std::vector<collisionStruct>& params)
 {
 
 }

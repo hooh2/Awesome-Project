@@ -16,7 +16,8 @@
 #include "CarTireRear.h"
 #include "CarTireFrontLeft.h"
 #include "CarTireFrontRight.h"
-#include "BuildingComponent.h"
+#include "BuildingBottoms.h"
+#include "BuildingTopping.h"
 #include "RoadAndGroundComponent.h"
 #include "TestTrack.h"
 #include "EnvironmentBenches.h"
@@ -86,9 +87,13 @@ class MyGame : public entry::AppI
 		entities.push_back(carTireFrontRight);
 		carTireFrontRight->addComponent(std::make_shared<CarTireFrontRight>());
 
-		auto buildings = std::make_shared<Entity>();
-		entities.push_back(buildings);
-		buildings->addComponent(std::make_shared<BuildingComponent>());
+		auto buildings_bottoms = std::make_shared<Entity>();
+		entities.push_back(buildings_bottoms);
+		buildings_bottoms->addComponent(std::make_shared<BuildingBottoms>());
+
+		auto buildings_toppings = std::make_shared<Entity>();
+		entities.push_back(buildings_toppings);
+		buildings_toppings->addComponent(std::make_shared<BuildingTopping>());
 
 		auto roadAndGround = std::make_shared<Entity>();
 		entities.push_back(roadAndGround);
