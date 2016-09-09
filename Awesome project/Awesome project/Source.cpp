@@ -95,8 +95,7 @@ class MyGame : public entry::AppI
 		{
 			entity->setCarObject(car);
 			entity->init();
-			entity->getCarObject(car);
-		}
+			entity->getCarObject(car);		}
 	}
 
 	virtual int shutdown() BX_OVERRIDE
@@ -135,14 +134,16 @@ class MyGame : public entry::AppI
 			bgfx::touch(0);
 
 			//--
+			car.update();
+
 			glm::mat4 playerRotationMat;
 			car.getRotationMTX(playerRotationMat);
 			glm::vec3 ViewTarget;
 			car.getCarPos(ViewTarget);
 			static glm::vec4 View1OFFe;
-			View1OFFe = playerRotationMat * glm::vec4(0, 15.0f, -25.0f, 1);
+			//View1OFFe = playerRotationMat * glm::vec4(0, 15.0f, -25.0f, 1);
 			//View1OFFe = playerRotationMat * glm::vec4(0, 300.0f, -300.0f, 1); //testing set
-			//View1OFFe = glm::vec4(0, 100.0f, -100.0f, 1); //testing set
+			View1OFFe = glm::vec4(0, 15.0f, -15.0f, 1); //testing set
 			glm::vec3 View1eye = glm::vec3(ViewTarget.x + View1OFFe.x, ViewTarget.y + View1OFFe.y, ViewTarget.z + View1OFFe.z);
 
 			float at[3] = { ViewTarget.x, ViewTarget.y,  ViewTarget.z };
@@ -154,8 +155,6 @@ class MyGame : public entry::AppI
 			float proj[16];
 			bx::mtxProj(proj, 60.0f, float(m_width) / float(m_height), 0.1f, 10000.0f);
 			bgfx::setViewTransform(0, view, proj);
-
-			car.update();
 
 			// Update all entities
 			for (auto& entity : entities)

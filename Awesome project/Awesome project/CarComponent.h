@@ -9,8 +9,15 @@
 #include <glm\gtc\matrix_transform.hpp>
 #include <glm\gtc\type_ptr.hpp>
 #include <glm\gtc\matrix_inverse.hpp>
+#include <glm\gtx\vector_angle.hpp>
 
 #include <memory>
+#include <functional>
+#include <numeric>
+#include <vector>
+#include <math.h>
+
+#define PI 3.14159265
 
 class CarComponent
 {
@@ -21,6 +28,7 @@ public:
 	void init();
 	void update();
 	void updateTransform(float xinc, float yinc, float zinc);
+	void midpoint(glm::vec3 a, glm::vec3 b, glm::vec3 & middle);
 	void getCarMTX(glm::mat4& in_mtx) { in_mtx = car_mtx; };
 	void getCarPos(glm::vec3& in_pos) { in_pos = car_pos; };
 	void getRotationMTX(glm::mat4& in_rotMTX) { in_rotMTX = rotationMTX; };

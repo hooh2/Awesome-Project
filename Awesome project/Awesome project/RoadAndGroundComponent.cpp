@@ -182,15 +182,17 @@ void RoadAndGroundComponent::QuadSeparation()
 	float x_length = maxOfTris.x - minOfTris.x;
 	float z_length = maxOfTris.z - minOfTris.z;
 
-	float quadSeze_x = x_length / 8;
-	float quadSeze_z = z_length / 8;
+	unsigned int quads_size = 16;
 
-	for (unsigned int w = 0; w < 8; w++)
+	float quadSeze_x = x_length / quads_size;
+	float quadSeze_z = z_length / quads_size;
+
+	for (unsigned int w = 0; w < quads_size; w++)
 	{
-		for (unsigned int h = 0; h < 8; h++)
+		for (unsigned int h = 0; h < quads_size; h++)
 		{
 			std::vector<glm::vec3> quadMinAndMax;
-			glm::vec3 minQuadCoord = glm::vec3(minOfTris.x + ((7 - w)*quadSeze_x), minOfTris.y, minOfTris.z + ((7 - h)*quadSeze_z));
+			glm::vec3 minQuadCoord = glm::vec3(minOfTris.x + ((quads_size - 1 - w)*quadSeze_x), minOfTris.y, minOfTris.z + ((quads_size - 1 - h)*quadSeze_z));
 			quadMinAndMax.push_back(minQuadCoord);
 			glm::vec3 maxQuadCoord = glm::vec3(maxOfTris.x - (w*quadSeze_x), maxOfTris.y, maxOfTris.z - (h*quadSeze_z));
 			quadMinAndMax.push_back(maxQuadCoord);
