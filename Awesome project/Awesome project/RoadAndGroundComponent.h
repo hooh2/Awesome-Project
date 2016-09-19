@@ -30,6 +30,7 @@ public:
 	void init() override;
 	void update();
 
+
 private:
 	glm::vec3 pos;
 	glm::mat4 mtx;
@@ -37,16 +38,19 @@ private:
 
 	std::vector<glm::vec3> model_normals;
 	std::vector<std::vector<glm::vec3>> model_triangles;
-	std::vector<std::vector<glm::vec3>> quadsMinAndMax;
-	std::vector<std::vector<unsigned int>> trianglesInQuads;
+	std::vector<std::vector<glm::vec3>> model_quadsMinAndMax;
+	std::vector<std::vector<unsigned int>> model_trianglesInQuads;
+	std::vector<std::vector<unsigned int>> model_triangleMap;
 
-	void Y_cordinate(glm::vec3 pos_coord, float& point_y);
+	void calcWeelTranslationY(glm::vec3 weel, float radius, unsigned int& triangle, float& weelTransY);
+	float isPointInsideSphere(glm::vec3 point, glm::vec3 sphere, float radius);
+	void projectionPoint(glm::vec3 point, unsigned int triangle, glm::vec3& projPoint);
+	void in_triangle(glm::vec3 pos_coord, unsigned int& triangle);
 	bool BarycentricCalculation2Dvec(glm::vec2 point, std::vector<glm::vec2> triangle);
-	void QuadSeparation();
-	void trianglesInQuadsSeparation(std::string path);
-	void wrightTrianglesInQuads(std::string path);
-	void readTrianglesInQuads(std::string path);
+	void QuadSeparation(std::vector<std::vector<glm::vec3>> triangles, std::vector<std::vector<glm::vec3>>& quadsMinAndMax, std::vector<std::vector<unsigned int>>& trisInQuads);
+	void trianglesInQuadsSeparation(std::vector<std::vector<glm::vec3>> triangles, std::vector<std::vector<glm::vec3>>& quadsMinAndMax, std::vector<std::vector<unsigned int>>& trisInQuads);
+	void wrightTriangles(std::string path, std::vector<std::vector<unsigned int>>& vectorToWright);
+	void readTriangles(std::string path, std::vector<std::vector<unsigned int>>& vectorToRead);
 	bool do_line_intersects(std::vector<glm::vec2> line1, std::vector<glm::vec2> line2);
 	void calcBoundingBox(std::vector<std::vector<glm::vec3>> triangles, std::vector<glm::vec3>& boundingBox);
-
 };

@@ -7,7 +7,7 @@ CarBody::~CarBody() {}
 
 void CarBody::init()
 {
-	auto scene = aiImportFile("models/f40_body.obj", aiProcessPreset_TargetRealtime_MaxQuality);
+	auto scene = aiImportFile("models/F40_body.obj", aiProcessPreset_TargetRealtime_MaxQuality);
 
 	if (scene && scene->mNumMeshes != 0)
 	{

@@ -29,9 +29,7 @@
 #include <memory>
 
 glm::mat4 mtx;
-
 CarComponent car;
-//bgfx::ProgramHandle program;
 
 std::vector<EntityPtr> entities;
 std::vector<bgfx::TextureHandle> textures;
@@ -171,18 +169,54 @@ class MyGame : public entry::AppI
 			//--
 			car.update();
 
+			static int camera_view = 1;
+			if (inputGetKeyState(entry::Key::Key1))
+			{
+				camera_view = 1;
+			}
+			if (inputGetKeyState(entry::Key::Key2))
+			{
+				camera_view = 2;
+			}
+			if (inputGetKeyState(entry::Key::Key3))
+			{
+				camera_view = 3;
+			}
+
 			glm::mat4 playerRotationMat;
 			car.getRotationMTX(playerRotationMat);
+			glm::vec4 ViewOFFe;
+			glm::vec4 ViewOFFt;
+			glm::vec3 ViewEye;
 			glm::vec3 ViewTarget;
-			car.getCarPos(ViewTarget);
-			static glm::vec4 View1OFFe;
-			View1OFFe = playerRotationMat * glm::vec4(0, 15.0f, -25.0f, 1);
-			//View1OFFe = playerRotationMat * glm::vec4(0, 300.0f, -300.0f, 1); //testing set
-			//View1OFFe = glm::vec4(0, 15.0f, -15.0f, 1); //testing set
-			glm::vec3 View1eye = glm::vec3(ViewTarget.x + View1OFFe.x, ViewTarget.y + View1OFFe.y, ViewTarget.z + View1OFFe.z);
+
+			switch (camera_view) {
+			case 1:
+				ViewOFFe = playerRotationMat * glm::vec4(0.f, 15.0f, -25.0f, 1.f);
+				car.getCarPos(ViewTarget);
+				ViewEye = glm::vec3(ViewTarget.x + ViewOFFe.x, ViewTarget.y + ViewOFFe.y, ViewTarget.z + ViewOFFe.z);
+				break;
+			case 2:
+				ViewOFFe = playerRotationMat * glm::vec4(0.8f, 2.7f, 2.8f, 1.f);
+				car.getCarPos(ViewTarget);
+				ViewEye = glm::vec3(ViewTarget.x + ViewOFFe.x, ViewTarget.y + ViewOFFe.y, ViewTarget.z + ViewOFFe.z);
+				ViewOFFt = playerRotationMat * glm::vec4(0.8f, 2.7f, 7.8f, 1.f);
+				ViewTarget += glm::vec3(ViewOFFt.x, ViewOFFt.y, ViewOFFt.z);
+				break;
+			case 3:
+				ViewOFFe = playerRotationMat * glm::vec4(0.f, 30.0f, 2.8f, 1.f);
+				car.getCarPos(ViewTarget);
+				ViewEye = glm::vec3(ViewTarget.x + ViewOFFe.x, ViewTarget.y + ViewOFFe.y, ViewTarget.z + ViewOFFe.z);
+				ViewOFFt = playerRotationMat * glm::vec4(0.f, 0.f, 2.8f, 1.f);
+				ViewTarget += glm::vec3(ViewOFFt.x, ViewOFFt.y, ViewOFFt.z);
+				break;
+			}
+
+			bgfx::dbgTextPrintf(2, 2, 0x0f, "ViewTarget: %f, %f, %f", ViewTarget.x, ViewTarget.y, ViewTarget.z);
+			bgfx::dbgTextPrintf(2, 3, 0x0f, "ViewEye: %f, %f, %f", ViewEye.x, ViewEye.y, ViewEye.z);
 
 			float at[3] = { ViewTarget.x, ViewTarget.y,  ViewTarget.z };
-			float eye[3] = { View1eye.x, View1eye.y, View1eye.z };
+			float eye[3] = { ViewEye.x, ViewEye.y, ViewEye.z };
 
 			float view[16];
 			bx::mtxLookAt(view, eye, at);

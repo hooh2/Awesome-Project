@@ -1,9 +1,9 @@
 #include "CarComponent.h"
 
-glm::vec3 rightF = glm::vec3(2.1f, 0.f, 6.5f);
-glm::vec3 leftF = glm::vec3(-2.1f, 0.f, 6.5f);
-glm::vec3 rightB = glm::vec3(2.1f, 0.f, 0.f);
-glm::vec3 leftB = glm::vec3(-2.1f, 0.f, 0.f);
+glm::vec3 rightF = glm::vec3(2.1f, 0.8f, 6.5f);
+glm::vec3 leftF = glm::vec3(-2.1f, 0.8f, 6.5f);
+glm::vec3 rightB = glm::vec3(2.1f, 0.8f, 0.f);
+glm::vec3 leftB = glm::vec3(-2.1f, 0.8f, 0.f);
 
 CarComponent::CarComponent() {}
 CarComponent::~CarComponent() {}
@@ -51,8 +51,13 @@ void CarComponent::update()
 		speedZ = 0;
 	}
 
-	updateTransform(0, rotY, 0);
+	float middleBetwinFrontweels = (wRFTtrans + wLFTtrans) / 2;
+	float middleBetwinRearWeels = (wRBTtrans + wLBTtrans) / 2;
+
+	updateTransform(-middleBetwinFrontweels, rotY, 0);
 	car_pos += speedZ * glm::vec3(rotationMTX[2][0], rotationMTX[2][1], rotationMTX[2][2]);
+
+	car_pos += glm::vec3(0.f, middleBetwinRearWeels, 0.f);
 
 	mtx = glm::translate(mtx, car_pos);
 	mtx = mtx * rotationMTX;
@@ -66,24 +71,9 @@ void CarComponent::update()
 	glm::vec4 leftBT = glm::vec4(leftB, 1.f);
 	worldLeftBT = mtx * leftBT;
 
-	glm::vec3 middleBetwinFrontweels;
-	midpoint(glm::vec3(worldRirhtFT.x, wRFT_y, worldRirhtFT.z), glm::vec3(worldLeftFT.x, wLFT_y, worldLeftFT.z), middleBetwinFrontweels);
-	glm::vec3 middleBetwinRearWeels;
-	midpoint(glm::vec3(worldRightBT.x, wRBT_y, worldRightBT.z), glm::vec3(worldLeftBT.x, wLBT_y, worldLeftBT.z), middleBetwinRearWeels);
-
-	glm::vec3 vector_a = glm::vec3(middleBetwinFrontweels - middleBetwinRearWeels);
-	glm::vec3 vector_b = glm::vec3(glm::vec3(middleBetwinFrontweels.x, middleBetwinRearWeels.y, middleBetwinFrontweels.z) - middleBetwinRearWeels);
-
-	float car_rot = glm::acos(glm::dot(vector_a, vector_b) / (glm::length(vector_a) * glm::length(vector_b)));
-
-	//if (car_rot > 0)
-	//	mtx = glm::rotate(mtx, car_rot, glm::vec3(rotationMTX[2][0], rotationMTX[2][1], rotationMTX[2][2]));
-
 	car_mtx = mtx;
-	
-	car_pos = middleBetwinRearWeels;
 
-	//bgfx::dbgTextPrintf(2, 2, 0x0f, "car_rot_2: %f", car_rot);
+	//bgfx::dbgTextPrintf(2, 2, 0x0f, "wRFTtrans: %f", wRFTtrans);
 
 }
 

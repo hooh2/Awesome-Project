@@ -59,7 +59,8 @@ void RoadAndGroundComponent::init()
 		}
 	}
 
-	QuadSeparation();
+	QuadSeparation(model_triangles, model_quadsMinAndMax, model_trianglesInQuads);
+
 	this->entity->getCarObject(car);
 
 	pos = glm::vec3(0.f, 0.f, 0.f);
@@ -72,38 +73,61 @@ void RoadAndGroundComponent::update()
 {
 	this->entity->getCarObject(car);
 
-	glm::vec3 car_front_right_tier; float CFRT_y;
-	glm::vec3 car_front_left_tier;  float CFLT_y;
-	glm::vec3 car_rear_right_tier;  float CRRT_y;
-	glm::vec3 car_rear_left_tier;   float CRLT_y;
+	glm::vec3 car_front_right_tier; float CFRTtrans; static unsigned int front_right_on;
+	glm::vec3 car_front_left_tier;  float CFLTtrans; static unsigned int front_left_on;
+	glm::vec3 car_rear_right_tier;  float CRRTtrans; static unsigned int rear_right_on;
+	glm::vec3 car_rear_left_tier;   float CRLTtrans; static unsigned int rear_left_on;
 	
 	car.getFRTcoords(car_front_right_tier);
 	car.getFLTcoords(car_front_left_tier);
 	car.getRRTcoords(car_rear_right_tier);
 	car.getRLTcoords(car_rear_left_tier);
 
-	Y_cordinate(car_front_right_tier, CFRT_y);
-	Y_cordinate(car_front_left_tier, CFLT_y);
-	Y_cordinate(car_rear_right_tier, CRRT_y);
-	Y_cordinate(car_rear_left_tier, CRLT_y);
+	calcWeelTranslationY(car_front_right_tier, 0.8f, front_right_on, CFRTtrans);
+	calcWeelTranslationY(car_front_left_tier, 0.8f, front_left_on, CFLTtrans);
+	calcWeelTranslationY(car_rear_right_tier, 0.8f, rear_right_on, CRRTtrans);
+	calcWeelTranslationY(car_rear_left_tier, 0.8f, rear_left_on, CRLTtrans);
 
-	car.setTiersYcoords(CFRT_y, CFLT_y, CRRT_y, CRLT_y);
+	car.setTiersYcoords(CFRTtrans, CFLTtrans, CRRTtrans, CRLTtrans);
 
 	this->entity->setCarObject(car);
 }
 
-void RoadAndGroundComponent::Y_cordinate(glm::vec3 pos_coord, float& point_y)
+void RoadAndGroundComponent::calcWeelTranslationY(glm::vec3 weel, float radius, unsigned int& triangle, float& weelTransY)
+{
+	glm::vec3 weelPproj;
+	in_triangle(weel, triangle);
+	projectionPoint(weel, triangle, weelPproj);
+	weelTransY = isPointInsideSphere(weelPproj, weel, radius);
+}
+
+float RoadAndGroundComponent::isPointInsideSphere(glm::vec3 point, glm::vec3 sphere, float radius) 
+{
+	float distance = sqrt((point.x - sphere.x) * (point.x - sphere.x) +
+		(point.y - sphere.y) * (point.y - sphere.y) +
+		(point.z - sphere.z) * (point.z - sphere.z));
+	return radius - distance;
+}
+
+void RoadAndGroundComponent::projectionPoint(glm::vec3 point, unsigned int triangle, glm::vec3& projPoint)
+{
+	glm::vec3 vPoint = point - model_triangles[triangle][0];
+	float dist = glm::dot(vPoint, model_normals[triangle]);
+	projPoint = point - dist*model_normals[triangle];
+}
+
+void RoadAndGroundComponent::in_triangle(glm::vec3 pos_coord, unsigned int& triangle)
 {
 	unsigned short int quad = 0;
-	for (unsigned int i = 0; i < quadsMinAndMax.size(); i++)
+	for (unsigned int i = 0; i < model_quadsMinAndMax.size(); i++)
 	{
-		if (pos_coord.x < quadsMinAndMax[i][1].x)
+		if (pos_coord.x < model_quadsMinAndMax[i][1].x)
 		{
-			if (pos_coord.x > quadsMinAndMax[i][0].x)
+			if (pos_coord.x > model_quadsMinAndMax[i][0].x)
 			{
-				if (pos_coord.z < quadsMinAndMax[i][1].z)
+				if (pos_coord.z < model_quadsMinAndMax[i][1].z)
 				{
-					if (pos_coord.z > quadsMinAndMax[i][0].z)
+					if (pos_coord.z > model_quadsMinAndMax[i][0].z)
 					{
 						quad = i;
 					}
@@ -112,28 +136,22 @@ void RoadAndGroundComponent::Y_cordinate(glm::vec3 pos_coord, float& point_y)
 		}
 	}
 
-	unsigned short int on_triangle = 0;
 	glm::vec2 pos_point = glm::vec2(pos_coord.x, pos_coord.z);
 
-	for (unsigned int i = 0; i < trianglesInQuads[quad].size(); i++)
+	for (unsigned int i = 0; i < model_trianglesInQuads[quad].size(); i++)
 	{
 		std::vector<glm::vec2> triangle2D;
 		for (unsigned int j = 0; j < 3; j++)
 		{
-			glm::vec2 triangle_point_2D = glm::vec2(model_triangles[trianglesInQuads[quad][i]][j].x, model_triangles[trianglesInQuads[quad][i]][j].z);
+			glm::vec2 triangle_point_2D = glm::vec2(model_triangles[model_trianglesInQuads[quad][i]][j].x, model_triangles[model_trianglesInQuads[quad][i]][j].z);
 			triangle2D.push_back(triangle_point_2D);
 		}
 
 		if (BarycentricCalculation2Dvec(pos_point, triangle2D))
 		{
-			on_triangle = trianglesInQuads[quad][i];
+			triangle = model_trianglesInQuads[quad][i];
 		}
 	}
-
-	glm::vec3 norm = model_normals[on_triangle];
-	glm::vec3 point_x = model_triangles[on_triangle][0];
-
-	point_y = (norm.x * (point_x.x - pos_coord.x) + norm.y * point_x.y + norm.z *(point_x.z - pos_coord.z)) / norm.y;
 }
 
 bool RoadAndGroundComponent::BarycentricCalculation2Dvec(glm::vec2 point, std::vector<glm::vec2> triangle)
@@ -171,10 +189,12 @@ bool RoadAndGroundComponent::do_line_intersects(std::vector<glm::vec2> line1, st
 	return s >= 0 && s <= 1 && t >= 0 && t <= 1; // Check if lines intersects
 }
 
-void RoadAndGroundComponent::QuadSeparation()
+void RoadAndGroundComponent::QuadSeparation(std::vector<std::vector<glm::vec3>> triangles, 
+											std::vector<std::vector<glm::vec3>>& quadsMinAndMax, 
+											std::vector<std::vector<unsigned int>>& trisInQuads)
 {
 	std::vector<glm::vec3> MinAndMax;
-	calcBoundingBox(model_triangles, MinAndMax);
+	calcBoundingBox(triangles, MinAndMax);
 
 	glm::vec3 minOfTris = MinAndMax[0];
 	glm::vec3 maxOfTris = MinAndMax[1];
@@ -205,16 +225,19 @@ void RoadAndGroundComponent::QuadSeparation()
 	if (std::experimental::filesystem::exists(path))
 	{
 		std::cout << "File " << path << " exists \n";
-		readTrianglesInQuads(path);
+		readTriangles(path, trisInQuads);
 	}
 	else
 	{
 		std::cout << "File " << path << " does not exists \n";
-		trianglesInQuadsSeparation(path);
+		trianglesInQuadsSeparation(triangles, quadsMinAndMax, trisInQuads);
+		wrightTriangles(path, trisInQuads);
 	}
 }
 
-void RoadAndGroundComponent::trianglesInQuadsSeparation(std::string path)
+void RoadAndGroundComponent::trianglesInQuadsSeparation(std::vector<std::vector<glm::vec3>> triangles,
+														std::vector<std::vector<glm::vec3>>& quadsMinAndMax,
+														std::vector<std::vector<unsigned int>>& trisInQuads)
 {
 	printf("Creating trianglesInQuads... ");
 
@@ -222,17 +245,17 @@ void RoadAndGroundComponent::trianglesInQuadsSeparation(std::string path)
 	{
 		std::vector<unsigned int> trianglesInThisQuad;
 
-		for (unsigned int j = 0; j < model_triangles.size(); j++)
+		for (unsigned int j = 0; j < triangles.size(); j++)
 		{
 			for (unsigned int c = 0; c < 3; c++)
 			{
-				if (model_triangles[j][c].x < quadsMinAndMax[i][1].x)
+				if (triangles[j][c].x < quadsMinAndMax[i][1].x)
 				{
-					if (model_triangles[j][c].x > quadsMinAndMax[i][0].x)
+					if (triangles[j][c].x > quadsMinAndMax[i][0].x)
 					{
-						if (model_triangles[j][c].z < quadsMinAndMax[i][1].z)
+						if (triangles[j][c].z < quadsMinAndMax[i][1].z)
 						{
-							if (model_triangles[j][c].z > quadsMinAndMax[i][0].z)
+							if (triangles[j][c].z > quadsMinAndMax[i][0].z)
 							{
 								trianglesInThisQuad.push_back(j);
 								break;
@@ -257,9 +280,9 @@ void RoadAndGroundComponent::trianglesInQuadsSeparation(std::string path)
 			std::vector<glm::vec2> edgeCD = { point_c, point_d };
 			std::vector<glm::vec2> edgeDA = { point_d, point_a };
 
-			glm::vec2 triangle_point_a = glm::vec2(model_triangles[j][0].x, model_triangles[j][0].z);
-			glm::vec2 triangle_point_b = glm::vec2(model_triangles[j][1].x, model_triangles[j][1].z);
-			glm::vec2 triangle_point_c = glm::vec2(model_triangles[j][2].x, model_triangles[j][2].z);
+			glm::vec2 triangle_point_a = glm::vec2(triangles[j][0].x, triangles[j][0].z);
+			glm::vec2 triangle_point_b = glm::vec2(triangles[j][1].x, triangles[j][1].z);
+			glm::vec2 triangle_point_c = glm::vec2(triangles[j][2].x, triangles[j][2].z);
 
 			std::vector<glm::vec2> triangle_edgeAB = { triangle_point_a, triangle_point_b };
 			std::vector<glm::vec2> triangle_edgeBC = { triangle_point_b, triangle_point_c };
@@ -326,26 +349,26 @@ void RoadAndGroundComponent::trianglesInQuadsSeparation(std::string path)
 
 		std::sort(trianglesInThisQuad.begin(), trianglesInThisQuad.end());
 
-		trianglesInQuads.push_back(trianglesInThisQuad);
+		trisInQuads.push_back(trianglesInThisQuad);
 	}
 	printf("Done! \n");
-	wrightTrianglesInQuads(path);
+	
 }
 
-void RoadAndGroundComponent::wrightTrianglesInQuads(std::string path)
+void RoadAndGroundComponent::wrightTriangles(std::string path, std::vector<std::vector<unsigned int>>& vectorToWright)
 {
 	std::ofstream fout;
 	fout.open(path);
 	if (fout.is_open())
 	{
-		std::cout << "Writing trianglesInQuads in to the file:\n" << path << " ... ";
-		fout << trianglesInQuads.size() << std::endl;
-		for (unsigned int i = 0; i < trianglesInQuads.size(); i++)
+		std::cout << "Writing information in to the file:\n" << path << " ... ";
+		fout << vectorToWright.size() << std::endl;
+		for (unsigned int i = 0; i < vectorToWright.size(); i++)
 		{
-			fout << trianglesInQuads[i].size() << std::endl;
-			for (unsigned int j = 0; j < trianglesInQuads[i].size(); j++)
+			fout << vectorToWright[i].size() << std::endl;
+			for (unsigned int j = 0; j < vectorToWright[i].size(); j++)
 			{
-				fout << trianglesInQuads[i][j] << " ";
+				fout << vectorToWright[i][j] << " ";
 			}
 			fout << std::endl;
 		}
@@ -356,14 +379,14 @@ void RoadAndGroundComponent::wrightTrianglesInQuads(std::string path)
 		std::cout << "Unable to open file " << path << std::endl;
 }
 
-void RoadAndGroundComponent::readTrianglesInQuads(std::string path)
+void RoadAndGroundComponent::readTriangles(std::string path, std::vector<std::vector<unsigned int>>& vectorToRead)
 {
 	std::ifstream fin;
 	fin.open(path);
 	if (fin.is_open())
 	{
 
-		std::cout << "Reading trianglesInQuads from the file:\n" << path << " ... ";
+		std::cout << "Reading information from the file:\n" << path << " ... ";
 		unsigned int numOfQuads;
 		fin >> numOfQuads;
 		while (!fin.eof())
@@ -373,14 +396,14 @@ void RoadAndGroundComponent::readTrianglesInQuads(std::string path)
 			{
 				unsigned int numOfIndices;
 				fin >> numOfIndices >> std::ws;
-				std::vector<unsigned int> trianglesInThisQuad;
+				std::vector<unsigned int> IndicesInOneVector;
 				for (unsigned int j = 0; j < numOfIndices; j++)
 				{
 					unsigned int triIndex;
 					fin >> triIndex >> std::ws;
-					trianglesInThisQuad.push_back(triIndex);
+					IndicesInOneVector.push_back(triIndex);
 				}
-				trianglesInQuads.push_back(trianglesInThisQuad);
+				vectorToRead.push_back(IndicesInOneVector);
 			}
 		}
 		fin.close();

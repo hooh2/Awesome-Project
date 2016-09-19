@@ -40,7 +40,7 @@ public:
 	void getRLTcoords(glm::vec3& in_coords) { in_coords = glm::vec3(worldLeftBT); };
 	void setTiersYcoords(float in_RFT, float in_LFT, float in_RBT, float in_LBT)
 	{
-		wRFT_y = in_RFT; wLFT_y = in_LFT; wRBT_y = in_RBT; wLBT_y = in_LBT;
+		wRFTtrans = in_RFT; wLFTtrans = in_LFT; wRBTtrans = in_RBT; wLBTtrans = in_LBT;
 	};
 
 private:
@@ -49,10 +49,10 @@ private:
 	glm::mat4 car_mtx;
 	glm::vec3 car_pos;
 
-	glm::vec4 worldRirhtFT; float wRFT_y;
-	glm::vec4 worldLeftFT;  float wLFT_y;
-	glm::vec4 worldRightBT; float wRBT_y;
-	glm::vec4 worldLeftBT;  float wLBT_y;
+	glm::vec4 worldRirhtFT; float wRFTtrans;
+	glm::vec4 worldLeftFT;  float wLFTtrans;
+	glm::vec4 worldRightBT; float wRBTtrans;
+	glm::vec4 worldLeftBT;  float wLBTtrans;
 
 	float rotY = 0.f;
 	float speedZ = 0.f;
