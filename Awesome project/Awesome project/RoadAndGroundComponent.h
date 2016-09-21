@@ -40,7 +40,6 @@ private:
 	std::vector<std::vector<glm::vec3>> model_triangles;
 	std::vector<std::vector<glm::vec3>> model_quadsMinAndMax;
 	std::vector<std::vector<unsigned int>> model_trianglesInQuads;
-	std::vector<std::vector<unsigned int>> model_triangleMap;
 
 	void calcWeelTranslationY(glm::vec3 weel, float radius, unsigned int& triangle, float& weelTransY);
 	float isPointInsideSphere(glm::vec3 point, glm::vec3 sphere, float radius);

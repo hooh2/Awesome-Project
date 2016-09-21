@@ -19,6 +19,7 @@
 #include "BuildingBottoms.h"
 #include "BuildingTopping.h"
 #include "RoadAndGroundComponent.h"
+#include "CarSetting.h"
 #include "TestTrack.h"
 #include "EnvironmentBenches.h"
 #include "EnvironmentBusStops.h"
@@ -65,8 +66,6 @@ class MyGame : public entry::AppI
 		// Create vertex stream declaration.
 		PosColorVertex::init();
 
-		//program = loadProgram("vs_tree", "fs_tree");
-
 		car.init();
 
 		auto carBody = std::make_shared<Entity>();
@@ -84,6 +83,10 @@ class MyGame : public entry::AppI
 		auto carTireFrontRight = std::make_shared<Entity>();
 		entities.push_back(carTireFrontRight);
 		carTireFrontRight->addComponent(std::make_shared<CarTireFrontRight>());
+
+		auto car_setting = std::make_shared<Entity>();
+		entities.push_back(car_setting);
+		car_setting->addComponent(std::make_shared<CarSetting>());
 
 		auto buildings_bottoms = std::make_shared<Entity>();
 		entities.push_back(buildings_bottoms);
@@ -128,7 +131,9 @@ class MyGame : public entry::AppI
 		{
 			entity->setCarObject(car);
 			entity->init();
-			entity->getCarObject(car);		}
+			entity->update();
+			entity->getCarObject(car);		
+		}
 	}
 
 	virtual int shutdown() BX_OVERRIDE
@@ -212,8 +217,8 @@ class MyGame : public entry::AppI
 				break;
 			}
 
-			bgfx::dbgTextPrintf(2, 2, 0x0f, "ViewTarget: %f, %f, %f", ViewTarget.x, ViewTarget.y, ViewTarget.z);
-			bgfx::dbgTextPrintf(2, 3, 0x0f, "ViewEye: %f, %f, %f", ViewEye.x, ViewEye.y, ViewEye.z);
+			//bgfx::dbgTextPrintf(2, 2, 0x0f, "ViewTarget: %f, %f, %f", ViewTarget.x, ViewTarget.y, ViewTarget.z);
+			//bgfx::dbgTextPrintf(2, 3, 0x0f, "ViewEye: %f, %f, %f", ViewEye.x, ViewEye.y, ViewEye.z);
 
 			float at[3] = { ViewTarget.x, ViewTarget.y,  ViewTarget.z };
 			float eye[3] = { ViewEye.x, ViewEye.y, ViewEye.z };

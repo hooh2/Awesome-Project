@@ -72,6 +72,9 @@
     <ClCompile Include="BuildingTopping.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CarSetting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component.h">
@@ -129,6 +132,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BuildingTopping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CarSetting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

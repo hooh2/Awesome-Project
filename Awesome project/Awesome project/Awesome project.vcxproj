@@ -128,6 +128,7 @@
     <ClCompile Include="BuildingTopping.cpp" />
     <ClCompile Include="CarBody.cpp" />
     <ClCompile Include="CarComponent.cpp" />
+    <ClCompile Include="CarSetting.cpp" />
     <ClCompile Include="CarTireFrontLeft.cpp" />
     <ClCompile Include="CarTireFrontRight.cpp" />
     <ClCompile Include="CarTireRear.cpp" />
@@ -149,6 +150,7 @@
     <ClInclude Include="BuildingTopping.h" />
     <ClInclude Include="CarBody.h" />
     <ClInclude Include="CarComponent.h" />
+    <ClInclude Include="CarSetting.h" />
     <ClInclude Include="CarTireFrontLeft.h" />
     <ClInclude Include="CarTireFrontRight.h" />
     <ClInclude Include="CarTireRear.h" />

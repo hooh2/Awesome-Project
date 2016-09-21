@@ -30,6 +30,11 @@ public:
 
 private:
 
+	std::vector<glm::vec3> model_normals;
+	std::vector<std::vector<glm::vec3>> model_triangles;
+	std::vector<glm::vec3> modelBB;
 	CarComponent car;
+
+	void calcBoundingBox(std::vector<std::vector<glm::vec3>> triangles, std::vector<glm::vec3>& boundingBox);
 };
 

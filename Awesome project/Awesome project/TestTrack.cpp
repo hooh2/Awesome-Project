@@ -60,6 +60,7 @@ void TestTrack::init()
 	}
 
 	calcBoundingBox(model_triangles, modelBB);
+	QuadSeparation(model_triangles, model_quadsMinAndMax, model_trianglesInQuads);
 
 	this->entity->getCarObject(car);
 
@@ -71,7 +72,346 @@ void TestTrack::init()
 
 void TestTrack::update()
 {
+	this->entity->getCarObject(car);
 
+	glm::vec3 car_front_right_tier; float CFRTtrans; static unsigned int front_right_on;
+	glm::vec3 car_front_left_tier;  float CFLTtrans; static unsigned int front_left_on;
+	glm::vec3 car_rear_right_tier;  float CRRTtrans; static unsigned int rear_right_on;
+	glm::vec3 car_rear_left_tier;   float CRLTtrans; static unsigned int rear_left_on;
+
+	car.getFRTcoords(car_front_right_tier);
+	car.getFLTcoords(car_front_left_tier);
+	car.getRRTcoords(car_rear_right_tier);
+	car.getRLTcoords(car_rear_left_tier);
+
+	calcWeelTranslationY(car_front_right_tier, 1.2f, front_right_on, CFRTtrans);
+	calcWeelTranslationY(car_front_left_tier, 1.2f, front_left_on, CFLTtrans);
+	calcWeelTranslationY(car_rear_right_tier, 1.2f, rear_right_on, CRRTtrans);
+	calcWeelTranslationY(car_rear_left_tier, 1.2f, rear_left_on, CRLTtrans);
+
+	car.setTiersPresOnTT(inBoundingBox(car_front_right_tier, modelBB),
+						inBoundingBox(car_front_left_tier, modelBB),
+						inBoundingBox(car_rear_right_tier, modelBB),
+						inBoundingBox(car_rear_left_tier, modelBB));
+
+	car.setTiersYcoordsOnTT(CFRTtrans, CFLTtrans, CRRTtrans, CRLTtrans);
+
+	this->entity->setCarObject(car);
+}
+
+void TestTrack::calcWeelTranslationY(glm::vec3 weel, float radius, unsigned int& triangle, float& weelTransY)
+{
+	glm::vec3 weelPproj;
+	in_triangle(weel, triangle);
+	projectionPoint(weel, triangle, weelPproj);
+	weelTransY = isPointInsideSphere(weelPproj, weel, radius);
+}
+
+float TestTrack::isPointInsideSphere(glm::vec3 point, glm::vec3 sphere, float radius)
+{
+	float distance = sqrt((point.x - sphere.x) * (point.x - sphere.x) +
+		(point.y - sphere.y) * (point.y - sphere.y) +
+		(point.z - sphere.z) * (point.z - sphere.z));
+	return radius - distance;
+}
+
+void TestTrack::projectionPoint(glm::vec3 point, unsigned int triangle, glm::vec3& projPoint)
+{
+	glm::vec3 vPoint = point - model_triangles[triangle][0];
+	float dist = glm::dot(vPoint, model_normals[triangle]);
+	projPoint = point - dist*model_normals[triangle];
+}
+
+void TestTrack::in_triangle(glm::vec3 pos_coord, unsigned int& triangle)
+{
+	unsigned short int quad = 0;
+	for (unsigned int i = 0; i < model_quadsMinAndMax.size(); i++)
+	{
+		if (pos_coord.x < model_quadsMinAndMax[i][1].x)
+		{
+			if (pos_coord.x > model_quadsMinAndMax[i][0].x)
+			{
+				if (pos_coord.z < model_quadsMinAndMax[i][1].z)
+				{
+					if (pos_coord.z > model_quadsMinAndMax[i][0].z)
+					{
+						quad = i;
+					}
+				}
+			}
+		}
+	}
+
+	glm::vec2 pos_point = glm::vec2(pos_coord.x, pos_coord.z);
+
+	for (unsigned int i = 0; i < model_trianglesInQuads[quad].size(); i++)
+	{
+		std::vector<glm::vec2> triangle2D;
+		for (unsigned int j = 0; j < 3; j++)
+		{
+			glm::vec2 triangle_point_2D = glm::vec2(model_triangles[model_trianglesInQuads[quad][i]][j].x, model_triangles[model_trianglesInQuads[quad][i]][j].z);
+			triangle2D.push_back(triangle_point_2D);
+		}
+
+		if (BarycentricCalculation2Dvec(pos_point, triangle2D))
+		{
+			triangle = model_trianglesInQuads[quad][i];
+		}
+	}
+}
+
+bool TestTrack::BarycentricCalculation2Dvec(glm::vec2 point, std::vector<glm::vec2> triangle)
+{
+	// Compute vectors        
+	glm::vec2 v0 = triangle[2] - triangle[0];
+	glm::vec2 v1 = triangle[1] - triangle[0];
+	glm::vec2 v2 = point - triangle[0];
+
+	// Compute dot products
+	float dot00 = glm::dot(v0, v0);
+	float dot01 = glm::dot(v0, v1);
+	float dot02 = glm::dot(v0, v2);
+	float dot11 = glm::dot(v1, v1);
+	float dot12 = glm::dot(v1, v2);
+
+	// Compute barycentric coordinates
+	float invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+	float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+	float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+	// Check if point is in triangle
+	return (u >= 0) && (v >= 0) && (u + v < 1);
+}
+
+bool TestTrack::do_line_intersects(std::vector<glm::vec2> line1, std::vector<glm::vec2> line2)
+{
+	glm::vec2 v1 = line1[1] - line1[0];
+	glm::vec2 v2 = line2[1] - line2[0];
+
+	float s, t;
+	s = (-v1.y * (line1[0].x - line2[0].x) + v1.x * (line1[0].y - line2[0].y)) / (-v2.x * v1.y + v1.x * v2.y);
+	t = (v2.x * (line1[0].y - line2[0].y) - v2.y * (line1[0].x - line2[0].x)) / (-v2.x * v1.y + v1.x * v2.y);
+
+	return s >= 0 && s <= 1 && t >= 0 && t <= 1; // Check if lines intersects
+}
+
+void TestTrack::QuadSeparation(std::vector<std::vector<glm::vec3>> triangles,
+								std::vector<std::vector<glm::vec3>>& quadsMinAndMax,
+								std::vector<std::vector<unsigned int>>& trisInQuads)
+{
+	std::vector<glm::vec3> MinAndMax;
+	calcBoundingBox(triangles, MinAndMax);
+
+	glm::vec3 minOfTris = MinAndMax[0];
+	glm::vec3 maxOfTris = MinAndMax[1];
+
+	float z_length = maxOfTris.z - minOfTris.z;
+
+	unsigned int quads_size = 8;
+
+	float quadSeze_z = z_length / quads_size;
+
+	for (unsigned int h = 0; h < quads_size; h++)
+	{
+		std::vector<glm::vec3> quadMinAndMax;
+		glm::vec3 minQuadCoord = glm::vec3(minOfTris.x, minOfTris.y, minOfTris.z + ((quads_size - 1 - h)*quadSeze_z));
+		quadMinAndMax.push_back(minQuadCoord);
+		glm::vec3 maxQuadCoord = glm::vec3(maxOfTris.x, maxOfTris.y, maxOfTris.z - (h*quadSeze_z));
+		quadMinAndMax.push_back(maxQuadCoord);
+		quadsMinAndMax.push_back(quadMinAndMax);
+	}
+
+	std::string path = "models/TrianglesOfTestTrackInQuads.txt";
+
+	if (std::experimental::filesystem::exists(path))
+	{
+		std::cout << "File " << path << " exists \n";
+		readTriangles(path, trisInQuads);
+	}
+	else
+	{
+		std::cout << "File " << path << " does not exists \n";
+		trianglesInQuadsSeparation(triangles, quadsMinAndMax, trisInQuads);
+		wrightTriangles(path, trisInQuads);
+	}
+}
+
+void TestTrack::trianglesInQuadsSeparation(std::vector<std::vector<glm::vec3>> triangles,
+	std::vector<std::vector<glm::vec3>>& quadsMinAndMax,
+	std::vector<std::vector<unsigned int>>& trisInQuads)
+{
+	printf("Creating trianglesInQuads... ");
+
+	for (unsigned int i = 0; i < quadsMinAndMax.size(); i++)
+	{
+		std::vector<unsigned int> trianglesInThisQuad;
+
+		for (unsigned int j = 0; j < triangles.size(); j++)
+		{
+			for (unsigned int c = 0; c < 3; c++)
+			{
+				if (triangles[j][c].x < quadsMinAndMax[i][1].x)
+				{
+					if (triangles[j][c].x > quadsMinAndMax[i][0].x)
+					{
+						if (triangles[j][c].z < quadsMinAndMax[i][1].z)
+						{
+							if (triangles[j][c].z > quadsMinAndMax[i][0].z)
+							{
+								trianglesInThisQuad.push_back(j);
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			if (trianglesInThisQuad.size() != 0 && j == trianglesInThisQuad.back())
+			{
+				continue;
+			}
+
+			glm::vec2 point_a = glm::vec2(quadsMinAndMax[i][0].x, quadsMinAndMax[i][1].z);
+			glm::vec2 point_b = glm::vec2(quadsMinAndMax[i][1].x, quadsMinAndMax[i][1].z);
+			glm::vec2 point_c = glm::vec2(quadsMinAndMax[i][0].x, quadsMinAndMax[i][0].z);
+			glm::vec2 point_d = glm::vec2(quadsMinAndMax[i][1].x, quadsMinAndMax[i][0].z);
+
+			std::vector<glm::vec2> edgeAB = { point_a, point_b };
+			std::vector<glm::vec2> edgeBC = { point_b, point_c };
+			std::vector<glm::vec2> edgeCD = { point_c, point_d };
+			std::vector<glm::vec2> edgeDA = { point_d, point_a };
+
+			glm::vec2 triangle_point_a = glm::vec2(triangles[j][0].x, triangles[j][0].z);
+			glm::vec2 triangle_point_b = glm::vec2(triangles[j][1].x, triangles[j][1].z);
+			glm::vec2 triangle_point_c = glm::vec2(triangles[j][2].x, triangles[j][2].z);
+
+			std::vector<glm::vec2> triangle_edgeAB = { triangle_point_a, triangle_point_b };
+			std::vector<glm::vec2> triangle_edgeBC = { triangle_point_b, triangle_point_c };
+			std::vector<glm::vec2> triangle_edgeCA = { triangle_point_c, triangle_point_a };
+
+			if (do_line_intersects(edgeAB, triangle_edgeAB))
+			{
+				trianglesInThisQuad.push_back(j);
+			}
+			else if (do_line_intersects(edgeAB, triangle_edgeBC))
+			{
+				trianglesInThisQuad.push_back(j);
+			}
+			else if (do_line_intersects(edgeAB, triangle_edgeCA))
+			{
+				trianglesInThisQuad.push_back(j);
+			}
+			else
+			{
+				if (do_line_intersects(edgeBC, triangle_edgeAB))
+				{
+					trianglesInThisQuad.push_back(j);
+				}
+				else if (do_line_intersects(edgeBC, triangle_edgeBC))
+				{
+					trianglesInThisQuad.push_back(j);
+				}
+				else if (do_line_intersects(edgeBC, triangle_edgeCA))
+				{
+					trianglesInThisQuad.push_back(j);
+				}
+				else
+				{
+					if (do_line_intersects(edgeCD, triangle_edgeAB))
+					{
+						trianglesInThisQuad.push_back(j);
+					}
+					else if (do_line_intersects(edgeCD, triangle_edgeBC))
+					{
+						trianglesInThisQuad.push_back(j);
+					}
+					else if (do_line_intersects(edgeCD, triangle_edgeCA))
+					{
+						trianglesInThisQuad.push_back(j);
+					}
+					else
+					{
+						if (do_line_intersects(edgeDA, triangle_edgeAB))
+						{
+							trianglesInThisQuad.push_back(j);
+						}
+						else if (do_line_intersects(edgeDA, triangle_edgeBC))
+						{
+							trianglesInThisQuad.push_back(j);
+						}
+						else if (do_line_intersects(edgeDA, triangle_edgeCA))
+						{
+							trianglesInThisQuad.push_back(j);
+						}
+					}
+				}
+			}
+		}
+
+		std::sort(trianglesInThisQuad.begin(), trianglesInThisQuad.end());
+
+		trisInQuads.push_back(trianglesInThisQuad);
+	}
+	printf("Done! \n");
+
+}
+
+void TestTrack::wrightTriangles(std::string path, std::vector<std::vector<unsigned int>>& vectorToWright)
+{
+	std::ofstream fout;
+	fout.open(path);
+	if (fout.is_open())
+	{
+		std::cout << "Writing information in to the file:\n" << path << " ... ";
+		fout << vectorToWright.size() << std::endl;
+		for (unsigned int i = 0; i < vectorToWright.size(); i++)
+		{
+			fout << vectorToWright[i].size() << std::endl;
+			for (unsigned int j = 0; j < vectorToWright[i].size(); j++)
+			{
+				fout << vectorToWright[i][j] << " ";
+			}
+			fout << std::endl;
+		}
+		fout.close();
+		printf("Done! \n");
+	}
+	else
+		std::cout << "Unable to open file " << path << std::endl;
+}
+
+void TestTrack::readTriangles(std::string path, std::vector<std::vector<unsigned int>>& vectorToRead)
+{
+	std::ifstream fin;
+	fin.open(path);
+	if (fin.is_open())
+	{
+
+		std::cout << "Reading information from the file:\n" << path << " ... ";
+		unsigned int numOfQuads;
+		fin >> numOfQuads;
+		while (!fin.eof())
+		{
+
+			for (unsigned int i = 0; i < numOfQuads; i++)
+			{
+				unsigned int numOfIndices;
+				fin >> numOfIndices >> std::ws;
+				std::vector<unsigned int> IndicesInOneVector;
+				for (unsigned int j = 0; j < numOfIndices; j++)
+				{
+					unsigned int triIndex;
+					fin >> triIndex >> std::ws;
+					IndicesInOneVector.push_back(triIndex);
+				}
+				vectorToRead.push_back(IndicesInOneVector);
+			}
+		}
+		fin.close();
+		printf("Done! \n");
+	}
+	else
+		std::cout << "Unable to open file " << path << std::endl;
 }
 
 void TestTrack::calcBoundingBox(std::vector<std::vector<glm::vec3>> triangles, std::vector<glm::vec3>& boundingBox)
@@ -139,4 +479,17 @@ void TestTrack::calcBoundingBox(std::vector<std::vector<glm::vec3>> triangles, s
 	boundingBox.push_back(minBB);
 	glm::vec3 maxBB(maxX, maxY, maxZ);
 	boundingBox.push_back(maxBB);
+}
+
+bool TestTrack::inBoundingBox(glm::vec3 point, std::vector<glm::vec3> boundingBox)
+{
+	if (point.x > boundingBox[0].x && point.x < boundingBox[1].x)
+	{
+		if (point.z > boundingBox[0].z && point.z < boundingBox[1].z)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }

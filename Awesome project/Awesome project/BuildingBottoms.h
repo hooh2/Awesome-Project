@@ -28,16 +28,17 @@ public:
 private:
 	glm::vec3 pos;
 	glm::mat4 mtx;
+	CarComponent car;
 
-	struct collisionStruct
-	{
-		std::vector<glm::vec3> positions;
-		std::vector<glm::vec3> normals;
-		std::vector<unsigned int> indices;
-		std::vector<std::vector<glm::vec3>> triangles;
-	};
+	std::vector<glm::vec3> model_normals;
+	std::vector<std::vector<glm::vec3>> model_triangles;
+	std::vector<std::vector<glm::vec3>> modelBBs;
+	std::vector<std::vector<unsigned int>> tiangles_in_BBs;
 
-	std::vector<collisionStruct> collisionParams;
-
-	void faceComposer(std::vector<collisionStruct>& params);
+	void calcBoundingBox(std::vector<std::vector<glm::vec3>> triangles, std::vector<glm::vec3>& boundingBox);
+	bool inBoundingBox(glm::vec3 point, std::vector<glm::vec3> boundingBox);
+	bool collisionCheck(glm::vec3 collisionContourPoint);
+	bool intersectCC_Triangle(glm::vec3 R1, glm::vec3 R2, unsigned int triangle);
+	bool BarycentricCalculation(glm::vec3 point, float dist, unsigned int triangle);
+	bool collisionBetweenPoint(glm::vec3 point, float threshold, unsigned int triangle);
 };

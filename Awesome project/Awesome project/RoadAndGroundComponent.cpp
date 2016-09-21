@@ -83,10 +83,10 @@ void RoadAndGroundComponent::update()
 	car.getRRTcoords(car_rear_right_tier);
 	car.getRLTcoords(car_rear_left_tier);
 
-	calcWeelTranslationY(car_front_right_tier, 0.8f, front_right_on, CFRTtrans);
-	calcWeelTranslationY(car_front_left_tier, 0.8f, front_left_on, CFLTtrans);
-	calcWeelTranslationY(car_rear_right_tier, 0.8f, rear_right_on, CRRTtrans);
-	calcWeelTranslationY(car_rear_left_tier, 0.8f, rear_left_on, CRLTtrans);
+	calcWeelTranslationY(car_front_right_tier, 1.2f, front_right_on, CFRTtrans);
+	calcWeelTranslationY(car_front_left_tier, 1.2f, front_left_on, CFLTtrans);
+	calcWeelTranslationY(car_rear_right_tier, 1.2f, rear_right_on, CRRTtrans);
+	calcWeelTranslationY(car_rear_left_tier, 1.2f, rear_left_on, CRLTtrans);
 
 	car.setTiersYcoords(CFRTtrans, CFLTtrans, CRRTtrans, CRLTtrans);
 
