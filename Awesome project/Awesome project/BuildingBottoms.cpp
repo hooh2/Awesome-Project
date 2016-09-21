@@ -182,7 +182,7 @@ bool BuildingBottoms::collisionCheck(glm::vec3 collisionContourPoint)
 		{
 			for (unsigned int t = 0; t < tiangles_in_BBs[b].size(); t++)
 			{
-				if (collisionBetweenPoint(collisionContourPoint, 1.f, tiangles_in_BBs[b][t]))
+				if (collisionBetweenPoint(collisionContourPoint, 2.f, tiangles_in_BBs[b][t]))
 				{
 					return true;
 				}

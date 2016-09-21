@@ -26,7 +26,13 @@ void CarComponent::update()
 
 	for (unsigned int r = 0; r < carCollisionContour.size(); r++)
 	{
-		if (collisionRespondBuildings[r] || collisionRespondCars[r])
+		if (collisionRespondBuildings[r] || 
+			collisionRespondCars[r] || 
+			collisionRespondEnvBenches[r]/* || 
+			collisionRespondEnvBusStops[r] || 
+			collisionRespondEnvLightPoles[r] || 
+			collisionRespondEnvMisc[r] || 
+			collisionRespondEnvStreetLights[r]*/)
 		{
 			collisionRespond.push_back(true);
 		}
@@ -36,7 +42,7 @@ void CarComponent::update()
 		}
 	}
 
-	if (inputGetKeyState(entry::Key::KeyW) && !collisionRespond[2] && !collisionRespond[3])
+	if (inputGetKeyState(entry::Key::KeyW) && !collisionRespond[2] && !collisionRespond[3] && !collisionRespond[4])
 	{
 		speedZ = speed;
 		mooving = true;
@@ -193,18 +199,25 @@ void CarComponent::collisionContourUpdate(std::vector<glm::vec3> modelBB, std::v
 	glm::vec4 point3 = glm::vec4(modelBB[1].x, modelBB[0].y, modelBB[1].z, 1.0f);
 	glm::vec4 point4 = glm::vec4(modelBB[0].x, modelBB[0].y, modelBB[1].z, 1.0f);
 
+	glm::vec4 point34 = glm::vec4((point3.x + point4.x)/2, modelBB[0].y, (point3.z + point4.z) / 2, 1.0f);
+
 	point1 = mtx * point1;
 	point2 = mtx * point2;
 	point3 = mtx * point3;
 	point4 = mtx * point4;
+
+	point34 = mtx * point34;
 
 	glm::vec3 point1_v3 = glm::vec3(point1);
 	glm::vec3 point2_v3 = glm::vec3(point2);
 	glm::vec3 point3_v3 = glm::vec3(point3);
 	glm::vec3 point4_v3 = glm::vec3(point4);
 
+	glm::vec3 point34_v3 = glm::vec3(point34);
+
 	collisionContour.push_back(point1_v3);
 	collisionContour.push_back(point2_v3);
 	collisionContour.push_back(point3_v3);
 	collisionContour.push_back(point4_v3);
+	collisionContour.push_back(point34_v3);
 }

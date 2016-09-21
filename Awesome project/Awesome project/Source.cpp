@@ -22,10 +22,10 @@
 #include "CarSetting.h"
 #include "TestTrack.h"
 #include "EnvironmentBenches.h"
-#include "EnvironmentBusStops.h"
-#include "EnvironmentLightPoles.h"
-#include "EnvironmentMisc.h"
-#include "EnvironmentStreetLights.h"
+//#include "EnvironmentBusStops.h"
+//#include "EnvironmentLightPoles.h"
+//#include "EnvironmentMisc.h"
+//#include "EnvironmentStreetLights.h"
 #include "PosColorVertex.h"
 #include <memory>
 
@@ -108,21 +108,24 @@ class MyGame : public entry::AppI
 		entities.push_back(environment_benches);
 		environment_benches->addComponent(std::make_shared<EnvironmentBenches>());
 
-		auto environment_bus_stops = std::make_shared<Entity>();
-		entities.push_back(environment_bus_stops);
-		environment_bus_stops->addComponent(std::make_shared<EnvironmentBusStops>());
 
-		auto environment_light_poles = std::make_shared<Entity>();
-		entities.push_back(environment_light_poles);
-		environment_light_poles->addComponent(std::make_shared<EnvironmentLightPoles>());
+		//There is no need in than much of environmental models in this project
 
-		auto environment_misc = std::make_shared<Entity>();
-		entities.push_back(environment_misc);
-		environment_misc->addComponent(std::make_shared<EnvironmentMisc>());
+		//auto environment_bus_stops = std::make_shared<Entity>();
+		//entities.push_back(environment_bus_stops);
+		//environment_bus_stops->addComponent(std::make_shared<EnvironmentBusStops>());
 
-		auto environment_street_lights = std::make_shared<Entity>();
-		entities.push_back(environment_street_lights);
-		environment_street_lights->addComponent(std::make_shared<EnvironmentStreetLights>());
+		//auto environment_light_poles = std::make_shared<Entity>();
+		//entities.push_back(environment_light_poles);
+		//environment_light_poles->addComponent(std::make_shared<EnvironmentLightPoles>());
+
+		//auto environment_misc = std::make_shared<Entity>();
+		//entities.push_back(environment_misc);
+		//environment_misc->addComponent(std::make_shared<EnvironmentMisc>());
+
+		//auto environment_street_lights = std::make_shared<Entity>();
+		//entities.push_back(environment_street_lights);
+		//environment_street_lights->addComponent(std::make_shared<EnvironmentStreetLights>());
 
 		m_timeOffset = bx::getHPCounter();
 
@@ -216,9 +219,6 @@ class MyGame : public entry::AppI
 				ViewTarget += glm::vec3(ViewOFFt.x, ViewOFFt.y, ViewOFFt.z);
 				break;
 			}
-
-			//bgfx::dbgTextPrintf(2, 2, 0x0f, "ViewTarget: %f, %f, %f", ViewTarget.x, ViewTarget.y, ViewTarget.z);
-			//bgfx::dbgTextPrintf(2, 3, 0x0f, "ViewEye: %f, %f, %f", ViewEye.x, ViewEye.y, ViewEye.z);
 
 			float at[3] = { ViewTarget.x, ViewTarget.y,  ViewTarget.z };
 			float eye[3] = { ViewEye.x, ViewEye.y, ViewEye.z };

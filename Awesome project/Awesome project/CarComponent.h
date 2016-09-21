@@ -60,6 +60,11 @@ public:
 	void getCarCC(std::vector<glm::vec3>& in_collisionContour) { in_collisionContour = carCollisionContour; };
 	void setCarColisionRespondBuildings(std::vector<bool> in_collisionRespond) { collisionRespondBuildings = in_collisionRespond; };
 	void setCarColisionRespondCars(std::vector<bool> in_collisionRespond) { collisionRespondCars = in_collisionRespond; };
+	void setCarCollisionRespondEnvBenches(std::vector<bool> in_collisionRespond) { collisionRespondEnvBenches = in_collisionRespond; };
+	void setCarCollisionRespondEnvBusStops(std::vector<bool> in_collisionRespond) { collisionRespondEnvBusStops = in_collisionRespond; };
+	void setCarCollisionRespondEnvLightPoles(std::vector<bool> in_collisionRespond) { collisionRespondEnvLightPoles = in_collisionRespond; };
+	void setCarCollisionRespondEnvMisc(std::vector<bool> in_collisionRespond) { collisionRespondEnvMisc = in_collisionRespond; };
+	void setCarCollisionRespondEnvStreetLights(std::vector<bool> in_collisionRespond) { collisionRespondEnvStreetLights = in_collisionRespond; };
 
 private:
 
@@ -70,6 +75,11 @@ private:
 	std::vector<glm::vec3> carCollisionContour;
 	std::vector<bool> collisionRespondBuildings;
 	std::vector<bool> collisionRespondCars;
+	std::vector<bool> collisionRespondEnvBenches;
+	std::vector<bool> collisionRespondEnvBusStops;
+	std::vector<bool> collisionRespondEnvLightPoles;
+	std::vector<bool> collisionRespondEnvMisc;
+	std::vector<bool> collisionRespondEnvStreetLights;
 
 	glm::vec4 worldRirhtFT; float wRFTtrans; bool wRFTonTT; float wRFTtransTT;
 	glm::vec4 worldLeftFT;  float wLFTtrans; bool wLFTonTT; float wLFTtransTT;
