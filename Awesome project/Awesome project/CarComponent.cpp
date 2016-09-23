@@ -119,7 +119,7 @@ void CarComponent::update()
 		middleBetwinRearWeels = wLBTtransLocal;
 
 	if (middleBetwinFrontweels > 2.0f)
-		rotX = 3.f;
+		rotX = middleBetwinFrontweels;
 	else if (middleBetwinFrontweels < -2.0f)
 		rotX = -3.f;
 	else
